@@ -4,12 +4,12 @@ import type { BaseComponentProps, StandardVariant } from '../../types';
 /**
  * Badge variants using standardized types
  */
-export type BadgeVariant = StandardVariant;
+export type BadgeVariant = StandardVariant | 'number';
 
 /**
  * Badge component props following standardized architecture
  */
-export interface BadgeProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'className'>, BaseComponentProps {
+export interface BadgeProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'className' | 'color'>, BaseComponentProps {
   /**
    * Visual style variant
    * @default 'solid'
@@ -19,5 +19,15 @@ export interface BadgeProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'class
   /**
    * Badge content
    */
-  children: ReactNode;
+  children?: ReactNode;
+  
+  /**
+   * Count number for number variant
+   */
+  count?: number;
+  
+  /**
+   * Whether to hide the badge
+   */
+  hidden?: boolean;
 }

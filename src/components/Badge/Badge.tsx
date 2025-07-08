@@ -21,15 +21,25 @@ export const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
       size = 'md',
       className,
       children,
+      count,
+      hidden = false,
       ...props
     },
     ref
   ) => {
+    // Handle hidden state
+    if (hidden) {
+      return null;
+    }
+    
     const badgeStyles = getBadgeStyles({
-      variant,
+      variant: variant === 'number' ? 'solid' : variant,
       color,
       size
     });
+    
+    // Determine content based on variant
+    const content = variant === 'number' && count !== undefined ? count.toString() : children;
     
     return (
       <span
@@ -37,7 +47,7 @@ export const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
         className={cn(badgeStyles, className)}
         {...props}
       >
-        {children}
+        {content}
       </span>
     );
   }

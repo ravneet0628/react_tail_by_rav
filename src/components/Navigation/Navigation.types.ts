@@ -4,7 +4,7 @@ import type { BaseComponentProps } from '../../types';
 /**
  * Simplified navigation variants focusing on common use cases
  */
-export type NavigationVariant = 'horizontal' | 'vertical' | 'breadcrumb' | 'tabs';
+export type NavigationVariant = 'horizontal' | 'vertical' | 'breadcrumb' | 'tabs' | 'pagination' | 'mobile' | 'mega';
 
 /**
  * Navigation item interface
@@ -44,12 +44,17 @@ export interface NavigationItem {
    * Accessibility label
    */
   'aria-label'?: string;
+  
+  /**
+   * Child navigation items for mega menus
+   */
+  children?: NavigationItem[];
 }
 
 /**
  * Navigation component props
  */
-export interface NavigationProps extends Omit<HTMLAttributes<HTMLElement>, 'className'>, BaseComponentProps {
+export interface NavigationProps extends Omit<HTMLAttributes<HTMLElement>, 'className' | 'color'>, BaseComponentProps {
   /**
    * Navigation style variant
    * @default 'horizontal'

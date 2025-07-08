@@ -69,3 +69,30 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
 );
 
 Card.displayName = 'Card';
+
+// Card subcomponents
+const CardHeader = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
+  ({ className = '', ...props }, ref) => (
+    <div ref={ref} className={`border-b border-gray-200 pb-4 mb-4 ${className}`} {...props} />
+  )
+);
+CardHeader.displayName = 'Card.Header';
+
+const CardBody = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
+  ({ className = '', ...props }, ref) => (
+    <div ref={ref} className={className} {...props} />
+  )
+);
+CardBody.displayName = 'Card.Body';
+
+const CardFooter = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
+  ({ className = '', ...props }, ref) => (
+    <div ref={ref} className={`border-t border-gray-200 pt-4 mt-4 ${className}`} {...props} />
+  )
+);
+CardFooter.displayName = 'Card.Footer';
+
+// Attach subcomponents to main Card
+(Card as any).Header = CardHeader;
+(Card as any).Body = CardBody;
+(Card as any).Footer = CardFooter;
