@@ -1,0 +1,588 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+# Design Patterns & Real-World Examples
+
+<Meta title="Patterns" />
+
+This page showcases real-world usage patterns and common design implementations using our React Tail component library. These examples demonstrate how to combine components effectively to build complex UI patterns.
+
+## 🏗️ Component Composition Patterns
+
+### 1. Authentication & User Management
+
+#### Registration Form
+A complete user registration flow with validation and accessibility features:
+
+```tsx
+import { Card, Input, Button, Alert, Switch } from 'react_tail_by_rav';
+import { useState } from 'react';
+
+function RegistrationForm() {
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    confirmPassword: '',
+    agreeToTerms: false
+  });
+  const [errors, setErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    // Form submission logic here
+  };
+
+  return (
+    <Card className="max-w-md mx-auto">
+      <Card.Header>
+        <Card.Title>Create Account</Card.Title>
+        <Card.Subtitle>Join our community today</Card.Subtitle>
+      </Card.Header>
+      
+      <Card.Body className="space-y-4">
+        {errors.general && (
+          <Alert variant="error">
+            <Alert.Icon />
+            <Alert.Content>
+              <Alert.Title>Registration Failed</Alert.Title>
+              <Alert.Description>{errors.general}</Alert.Description>
+            </Alert.Content>
+          </Alert>
+        )}
+        
+        <Input
+          type="email"
+          placeholder="Enter your email"
+          value={formData.email}
+          onChange={(e) => setFormData(prev => ({...prev, email: e.target.value}))}
+          error={errors.email}
+          required
+        />
+        
+        <Input
+          type="password"
+          placeholder="Create password"
+          value={formData.password}
+          onChange={(e) => setFormData(prev => ({...prev, password: e.target.value}))}
+          error={errors.password}
+          required
+        />
+        
+        <Input
+          type="password"
+          placeholder="Confirm password"
+          value={formData.confirmPassword}
+          onChange={(e) => setFormData(prev => ({...prev, confirmPassword: e.target.value}))}
+          error={errors.confirmPassword}
+          required
+        />
+        
+        <div className="flex items-center space-x-2">
+          <Switch
+            checked={formData.agreeToTerms}
+            onCheckedChange={(checked) => setFormData(prev => ({...prev, agreeToTerms: checked}))}
+            id="terms"
+          />
+          <label htmlFor="terms" className="text-sm">
+            I agree to the <a href="/terms" className="text-blue-600 hover:underline">Terms of Service</a>
+          </label>
+        </div>
+      </Card.Body>
+      
+      <Card.Footer>
+        <Button 
+          variant="primary" 
+          className="w-full"
+          disabled={!formData.agreeToTerms || isLoading}
+          onClick={handleSubmit}
+        >
+          {isLoading ? 'Creating Account...' : 'Create Account'}
+        </Button>
+        <Button variant="secondary" className="w-full">
+          Sign in instead
+        </Button>
+      </Card.Footer>
+    </Card>
+  );
+}
+```
+
+#### User Profile Settings
+A comprehensive settings form with multiple sections:
+
+```tsx
+import { Card, Input, Avatar, Button, Switch, Alert, Badge } from 'react_tail_by_rav';
+import { useState } from 'react';
+
+function UserSettings() {
+  const [settings, setSettings] = useState({
+    orderUpdates: true,
+    marketing: false,
+    security: true,
+    browser: false,
+    mobile: true
+  });
+
+  const handleSave = () => {
+    // Save settings logic
+  };
+
+  return (
+    <div className="max-w-2xl mx-auto space-y-6">
+      {/* Profile Information */}
+      <Card>
+        <Card.Header>
+          <div className="flex items-center space-x-4">
+            <Avatar size="lg" src="/user-avatar.jpg" alt="User Avatar" />
+            <div>
+              <Card.Title>Profile Information</Card.Title>
+              <Card.Subtitle>Update your personal details</Card.Subtitle>
+            </div>
+            <Badge variant="success">Verified</Badge>
+          </div>
+        </Card.Header>
+        
+        <Card.Body className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Input label="First Name" defaultValue="John" />
+            <Input label="Last Name" defaultValue="Doe" />
+          </div>
+          <Input label="Email" type="email" defaultValue="john@example.com" />
+          <Input label="Bio" multiline rows={3} placeholder="Tell us about yourself..." />
+        </Card.Body>
+        
+        <Card.Footer>
+          <Button variant="primary">Save Changes</Button>
+          <Button variant="secondary">Cancel</Button>
+        </Card.Footer>
+      </Card>
+
+      {/* Notification Preferences */}
+      <Card>
+        <Card.Header>
+          <Card.Title>Notifications</Card.Title>
+          <Card.Subtitle>Manage how you receive updates</Card.Subtitle>
+        </Card.Header>
+        
+        <Card.Body className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h4 className="font-medium">Email Notifications</h4>
+              <p className="text-sm text-gray-600">Receive updates via email</p>
+            </div>
+            <Switch defaultChecked />
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <div>
+              <h4 className="font-medium">Push Notifications</h4>
+              <p className="text-sm text-gray-600">Receive push notifications in browser</p>
+            </div>
+            <Switch />
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <div>
+              <h4 className="font-medium">Marketing Updates</h4>
+              <p className="text-sm text-gray-600">Receive news and promotional content</p>
+            </div>
+            <Switch />
+          </div>
+        </Card.Body>
+      </Card>
+    </div>
+  );
+}
+```
+
+### 2. Data Display & Analytics
+
+#### Dashboard Statistics Cards
+Modern dashboard cards with key metrics:
+
+```tsx
+import { Card, Badge, Button } from 'react_tail_by_rav';
+import { useState } from 'react';
+
+function DashboardStats() {
+  const [stats, setStats] = useState([
+    { title: 'Total Revenue', value: '$45,231', change: '+12%', trend: 'up' },
+    { title: 'New Customers', value: '1,234', change: '+5%', trend: 'up' },
+    { title: 'Active Users', value: '8,765', change: '-2%', trend: 'down' },
+    { title: 'Conversion Rate', value: '3.24%', change: '+8%', trend: 'up' }
+  ]);
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {stats.map((stat, index) => (
+        <Card key={index} className="hover:shadow-lg transition-shadow">
+          <Card.Body>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">{stat.title}</p>
+                <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+              </div>
+              <Badge 
+                variant={stat.trend === 'up' ? 'success' : 'error'}
+                className="ml-2"
+              >
+                {stat.change}
+              </Badge>
+            </div>
+          </Card.Body>
+        </Card>
+      ))}
+    </div>
+  );
+}
+```
+
+#### Activity Feed
+A social media style activity feed:
+
+```tsx
+import { Card, Avatar, Badge, Button } from 'react_tail_by_rav';
+import { useState } from 'react';
+
+function ActivityFeed() {
+  const [activities, setActivities] = useState([
+    {
+      id: 1,
+      user: { name: 'Sarah Chen', avatar: '/avatars/sarah.jpg' },
+      action: 'completed',
+      target: 'Website Redesign Project',
+      time: '2 hours ago',
+      type: 'success'
+    },
+    {
+      id: 2,
+      user: { name: 'Mike Johnson', avatar: '/avatars/mike.jpg' },
+      action: 'commented on',
+      target: 'Q4 Marketing Strategy',
+      time: '4 hours ago',
+      type: 'info'
+    },
+    {
+      id: 3,
+      user: { name: 'Emily Davis', avatar: '/avatars/emily.jpg' },
+      action: 'created',
+      target: 'New Feature Specification',
+      time: '1 day ago',
+      type: 'warning'
+    }
+  ]);
+
+  return (
+    <Card>
+      <Card.Header>
+        <div className="flex items-center justify-between">
+          <Card.Title>Recent Activity</Card.Title>
+          <Button variant="secondary" size="sm">View All</Button>
+        </div>
+      </Card.Header>
+      
+      <Card.Body className="space-y-4">
+        {activities.map((activity) => (
+          <div key={activity.id} className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50">
+            <Avatar 
+              src={activity.user.avatar} 
+              alt={activity.user.name}
+              size="sm"
+            />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm">
+                <span className="font-medium text-gray-900">{activity.user.name}</span>
+                <span className="text-gray-600"> {activity.action} </span>
+                <span className="font-medium text-gray-900">{activity.target}</span>
+              </p>
+              <div className="flex items-center space-x-2 mt-1">
+                <Badge variant={activity.type} size="sm">{activity.type}</Badge>
+                <span className="text-xs text-gray-500">{activity.time}</span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </Card.Body>
+    </Card>
+  );
+}
+```
+
+### 3. E-commerce Patterns
+
+#### Product Grid
+A responsive product grid with filtering:
+
+```tsx
+import { Card, Button, Badge, Input } from 'react_tail_by_rav';
+import { useState } from 'react';
+
+function ProductGrid() {
+  const [products, setProducts] = useState([
+    {
+      id: 1,
+      name: 'Wireless Headphones',
+      price: '$299',
+      image: '/products/headphones.jpg',
+      rating: 4.5,
+      badge: 'Best Seller'
+    },
+    {
+      id: 2,
+      name: 'Smart Watch',
+      price: '$399',
+      image: '/products/watch.jpg',
+      rating: 4.8,
+      badge: 'New'
+    },
+    {
+      id: 3,
+      name: 'Laptop Backpack',
+      price: '$89',
+      image: '/products/backpack.jpg',
+      rating: 4.3,
+      badge: 'Sale'
+    }
+  ]);
+
+  return (
+    <div className="space-y-6">
+      {/* Filters */}
+      <Card>
+        <Card.Body>
+          <div className="flex flex-wrap gap-4">
+            <Input placeholder="Search products..." className="flex-1 min-w-64" />
+            <Button variant="secondary">Filter</Button>
+            <Button variant="secondary">Sort</Button>
+          </div>
+        </Card.Body>
+      </Card>
+
+      {/* Product Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {products.map((product) => (
+          <Card key={product.id} className="hover:shadow-lg transition-shadow">
+            <div className="aspect-square bg-gray-100 rounded-t-lg relative">
+              <img 
+                src={product.image} 
+                alt={product.name}
+                className="w-full h-full object-cover rounded-t-lg"
+              />
+              {product.badge && (
+                <Badge 
+                  variant={product.badge === 'Sale' ? 'error' : 'success'}
+                  className="absolute top-2 left-2"
+                >
+                  {product.badge}
+                </Badge>
+              )}
+            </div>
+            
+            <Card.Body>
+              <h3 className="font-medium text-gray-900 truncate">{product.name}</h3>
+              <div className="flex items-center justify-between mt-2">
+                <span className="text-lg font-bold text-gray-900">{product.price}</span>
+                <div className="flex items-center space-x-1">
+                  <span className="text-yellow-400">★</span>
+                  <span className="text-sm text-gray-600">{product.rating}</span>
+                </div>
+              </div>
+            </Card.Body>
+            
+            <Card.Footer>
+              <Button variant="primary" className="w-full">Add to Cart</Button>
+            </Card.Footer>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
+```
+
+### 4. Navigation Patterns
+
+#### Mobile-First Navigation
+Responsive navigation with mobile menu:
+
+```tsx
+import { Navigation, Button, Avatar, Dropdown } from 'react_tail_by_rav';
+import { useState } from 'react';
+
+function AppNavigation() {
+  const [navItems, setNavItems] = useState([
+    { id: 'home', label: 'Home', href: '/' },
+    { id: 'products', label: 'Products', href: '/products' },
+    { id: 'about', label: 'About', href: '/about' },
+    { id: 'contact', label: 'Contact', href: '/contact' }
+  ]);
+
+  return (
+    <Navigation className="border-b">
+      <Navigation.Brand>
+        <img src="/logo.svg" alt="Logo" className="h-8 w-auto" />
+        <span className="ml-2 text-xl font-bold">My App</span>
+      </Navigation.Brand>
+      
+      <Navigation.Menu>
+        {navItems.map((item) => (
+          <Navigation.Item key={item.id} href={item.href}>
+            {item.label}
+          </Navigation.Item>
+        ))}
+        
+        <div className="flex items-center space-x-4 ml-4">
+          <Button variant="secondary" size="sm">
+            Upgrade
+          </Button>
+          
+          <Dropdown>
+            <Dropdown.Trigger>
+              <Avatar src="/user-avatar.jpg" alt="User" size="sm" />
+            </Dropdown.Trigger>
+            <Dropdown.Content align="end">
+              <Dropdown.Item>Profile</Dropdown.Item>
+              <Dropdown.Item>Settings</Dropdown.Item>
+              <Dropdown.Item>Billing</Dropdown.Item>
+              <Dropdown.Separator />
+              <Dropdown.Item>Sign Out</Dropdown.Item>
+            </Dropdown.Content>
+          </Dropdown>
+        </div>
+      </Navigation.Menu>
+    </Navigation>
+  );
+}
+```
+
+## 🎨 Advanced Composition Techniques
+
+### State Management Patterns
+```tsx
+// Using compound components with shared state
+function SearchableTable() {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedRows, setSelectedRows] = useState([]);
+
+  return (
+    <Card>
+      <Card.Header>
+        <div className="flex items-center justify-between">
+          <Card.Title>Users</Card.Title>
+          <Input 
+            placeholder="Search users..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+      </Card.Header>
+      
+      <Table>
+        <Table.Header>
+          <Table.Row>
+            <Table.HeaderCell>
+              <input type="checkbox" />
+            </Table.HeaderCell>
+            <Table.HeaderCell>Name</Table.HeaderCell>
+            <Table.HeaderCell>Email</Table.HeaderCell>
+            <Table.HeaderCell>Status</Table.HeaderCell>
+          </Table.Row>
+        </Table.Header>
+        <Table.Body>
+          {/* Filtered and mapped data */}
+        </Table.Body>
+      </Table>
+    </Card>
+  );
+}
+```
+
+### Accessibility Integration
+```tsx
+// Comprehensive accessibility example
+function AccessibleForm() {
+  return (
+    <form role="form" aria-labelledby="form-title">
+      <h2 id="form-title">Contact Information</h2>
+      
+      <fieldset>
+        <legend>Personal Details</legend>
+        <Input
+          label="Full Name"
+          required
+          aria-describedby="name-help"
+        />
+        <p id="name-help" className="text-sm text-gray-600">
+          Enter your full legal name
+        </p>
+        
+        <Input
+          label="Email"
+          type="email"
+          required
+          aria-describedby="email-help"
+        />
+        <p id="email-help" className="text-sm text-gray-600">
+          We'll never share your email address
+        </p>
+      </fieldset>
+      
+      <Button type="submit" aria-describedby="submit-help">
+        Submit Form
+      </Button>
+      <p id="submit-help" className="text-sm text-gray-600">
+        Click to submit your contact information
+      </p>
+    </form>
+  );
+}
+```
+
+## 🚀 Performance Optimization Patterns
+
+### Lazy Loading Components
+```tsx
+import { lazy, Suspense } from 'react';
+import { Loading } from 'react_tail_by_rav';
+
+const HeavyComponent = lazy(() => import('./HeavyComponent'));
+
+function OptimizedApp() {
+  return (
+    <Suspense fallback={<Loading.Skeleton />}>
+      <HeavyComponent />
+    </Suspense>
+  );
+}
+```
+
+### Efficient Re-rendering
+```tsx
+import { memo, useCallback, useMemo } from 'react';
+
+const OptimizedCard = memo(({ data, onAction }) => {
+  const handleClick = useCallback((id) => {
+    onAction(id);
+  }, [onAction]);
+
+  const formattedData = useMemo(() => 
+    data.map(item => ({...item, formatted: formatData(item)})),
+    [data]
+  );
+
+  return (
+    <Card>
+      {formattedData.map(item => (
+        <Card.Item key={item.id} onClick={() => handleClick(item.id)}>
+          {item.formatted}
+        </Card.Item>
+      ))}
+    </Card>
+  );
+});
+```
+
+---
+
+These patterns demonstrate the flexibility and power of our component library. Each example shows real-world usage scenarios that you can adapt for your specific needs. The key is to leverage compound components, accessibility features, and performance optimizations to create exceptional user experiences. 

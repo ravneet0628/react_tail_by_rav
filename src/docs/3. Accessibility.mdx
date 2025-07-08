@@ -1,0 +1,414 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+# Accessibility Guidelines & Testing
+
+<Meta title="Accessibility" />
+
+Our React Tail component library is built with **accessibility as a core principle**, not an afterthought. Every component follows WCAG 2.1 AA guidelines and is tested with both automated tools and manual accessibility reviews.
+
+## 🎯 Our Accessibility Promise
+
+### ✅ WCAG 2.1 AA Compliance
+All components meet or exceed Web Content Accessibility Guidelines Level AA standards:
+
+- **Perceivable**: Content is presentable to users in ways they can perceive
+- **Operable**: Interface components are operable by all users
+- **Understandable**: Information and UI operation are understandable
+- **Robust**: Content works with various assistive technologies
+
+### ♿ Universal Design Principles
+- **Keyboard Navigation**: Full functionality without mouse dependency
+- **Screen Reader Support**: Comprehensive ARIA labeling and semantic markup
+- **Color Accessibility**: High contrast ratios and color-blind friendly palettes
+- **Focus Management**: Clear focus indicators and logical tab order
+- **Motion Sensitivity**: Respects user preferences for reduced motion
+
+## 🔧 Built-in Accessibility Features
+
+### Semantic HTML Foundation
+All components use appropriate semantic HTML elements:
+
+```tsx
+// Button component uses native button element
+<Button variant="primary">
+  Submit Form  {/* Automatically accessible */}
+</Button>
+
+// Navigation uses nav element with proper structure
+<Navigation>
+  <Navigation.Brand>Logo</Navigation.Brand>
+  <Navigation.Menu role="menubar">
+    <Navigation.Item role="menuitem">Home</Navigation.Item>
+  </Navigation.Menu>
+</Navigation>
+```
+
+### ARIA Integration
+Comprehensive ARIA attributes for enhanced screen reader support:
+
+```tsx
+// Modal with proper ARIA labels
+<Modal 
+  isOpen={isOpen} 
+  onClose={handleClose}
+  aria-labelledby="modal-title"
+  aria-describedby="modal-description"
+>
+  <Modal.Header>
+    <Modal.Title id="modal-title">Confirm Action</Modal.Title>
+  </Modal.Header>
+  <Modal.Body id="modal-description">
+    Are you sure you want to delete this item?
+  </Modal.Body>
+</Modal>
+
+// Form inputs with proper labeling
+<Input
+  label="Email Address"
+  type="email"
+  required
+  aria-describedby="email-help"
+  error={emailError}
+  aria-invalid={!!emailError}
+/>
+<p id="email-help">We'll never share your email</p>
+```
+
+### Keyboard Navigation
+Every interactive component supports keyboard navigation:
+
+```tsx
+// Dropdown with full keyboard support
+<Dropdown>
+  <Dropdown.Trigger>
+    Options  {/* Space/Enter to open */}
+  </Dropdown.Trigger>
+  <Dropdown.Content>
+    {/* Arrow keys to navigate, Enter/Space to select, Escape to close */}
+    <Dropdown.Item>Profile</Dropdown.Item>
+    <Dropdown.Item>Settings</Dropdown.Item>
+  </Dropdown.Content>
+</Dropdown>
+
+// Table with keyboard navigation
+<Table>
+  <Table.Header>
+    <Table.HeaderCell tabIndex={0}>Name</Table.HeaderCell>  {/* Tab navigation */}
+  </Table.Header>
+  <Table.Body>
+    <Table.Row>
+      <Table.Cell tabIndex={0}>John Doe</Table.Cell>  {/* Focus management */}
+    </Table.Row>
+  </Table.Body>
+</Table>
+```
+
+## 🧪 Testing Strategy
+
+### Automated Testing with axe-core
+We use industry-standard automated accessibility testing:
+
+```tsx
+import { render } from '@testing-library/react';
+import { axe, toHaveNoViolations } from 'jest-axe';
+import { Button } from './Button';
+
+expect.extend(toHaveNoViolations);
+
+test('Button has no accessibility violations', async () => {
+  const { container } = render(
+    <Button variant="primary">Click me</Button>
+  );
+  
+  const results = await axe(container);
+  expect(results).toHaveNoViolations();
+});
+
+// Testing with different states
+test('Button states are accessible', async () => {
+  const { container, rerender } = render(
+    <Button disabled>Disabled Button</Button>
+  );
+  
+  let results = await axe(container);
+  expect(results).toHaveNoViolations();
+  
+  rerender(<Button loading>Loading Button</Button>);
+  results = await axe(container);
+  expect(results).toHaveNoViolations();
+});
+```
+
+### Manual Testing with Screen Readers
+Regular testing with popular screen readers:
+
+#### Testing Checklist
+- **NVDA (Windows)**: Primary testing screen reader
+- **JAWS (Windows)**: Secondary testing for compatibility
+- **VoiceOver (macOS)**: Mac accessibility testing
+- **TalkBack (Android)**: Mobile accessibility testing
+
+#### Screen Reader Test Scenarios
+```tsx
+// Test announcement of dynamic content
+function AccessibleAlert() {
+  const [message, setMessage] = useState('');
+  
+  return (
+    <div>
+      <Button onClick={() => setMessage('Form saved successfully!')}>
+        Save Form
+      </Button>
+      
+      {/* Screen reader announces changes */}
+      <Alert 
+        role="status" 
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {message}
+      </Alert>
+    </div>
+  );
+}
+
+// Test navigation announcements
+function AccessibleNavigation() {
+  return (
+    <Navigation aria-label="Main navigation">
+      <Navigation.Menu>
+        <Navigation.Item 
+          href="/home"
+          aria-current={currentPage === 'home' ? 'page' : undefined}
+        >
+          Home
+        </Navigation.Item>
+        <Navigation.Item href="/about">About</Navigation.Item>
+      </Navigation.Menu>
+    </Navigation>
+  );
+}
+```
+
+### Keyboard Testing Protocol
+Comprehensive keyboard navigation testing:
+
+#### Standard Key Behaviors
+- **Tab**: Move forward through interactive elements
+- **Shift + Tab**: Move backward through interactive elements
+- **Enter**: Activate buttons and links
+- **Space**: Activate buttons, toggle checkboxes
+- **Arrow Keys**: Navigate within components (menus, tabs)
+- **Escape**: Close modals, dropdowns, or cancel operations
+- **Home/End**: Navigate to first/last item in lists
+
+#### Component-Specific Testing
+```tsx
+// Slider keyboard accessibility
+<Slider
+  value={value}
+  onChange={setValue}
+  min={0}
+  max={100}
+  step={5}
+  aria-label="Volume control"
+  // Supports:
+  // - Arrow Left/Right: Decrease/increase by step
+  // - Home/End: Go to min/max values
+  // - Page Up/Down: Large increments
+/>
+
+// Switch keyboard accessibility  
+<Switch
+  checked={isEnabled}
+  onCheckedChange={setIsEnabled}
+  aria-labelledby="notifications-label"
+  // Supports:
+  // - Space/Enter: Toggle state
+  // - Tab: Focus management
+/>
+```
+
+## 🎨 Color & Contrast Standards
+
+### WCAG AA Compliance
+All color combinations meet minimum contrast ratios:
+
+- **Normal text**: 4.5:1 contrast ratio minimum
+- **Large text (18pt+)**: 3:1 contrast ratio minimum  
+- **UI components**: 3:1 contrast ratio for borders and focus indicators
+
+### Color Usage Guidelines
+```tsx
+// Accessible color variants
+<Alert variant="error">
+  {/* Red with sufficient contrast: #DC2626 on white */}
+  <Alert.Title>Error</Alert.Title>
+  <Alert.Description>Please fix the errors below</Alert.Description>
+</Alert>
+
+<Alert variant="success">
+  {/* Green with sufficient contrast: #059669 on white */}
+  <Alert.Title>Success</Alert.Title>
+  <Alert.Description>Your changes have been saved</Alert.Description>
+</Alert>
+
+// Focus indicators with high contrast
+<Button className="focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+  Accessible Focus  {/* 3:1 contrast ratio for focus ring */}
+</Button>
+```
+
+### Dark Mode Accessibility
+Proper contrast in both light and dark themes:
+
+```tsx
+// Theme-aware contrast
+function ThemeAwareButton({ children, ...props }) {
+  return (
+    <Button
+      className={`
+        light:text-gray-900 light:bg-white light:border-gray-300
+        dark:text-gray-100 dark:bg-gray-800 dark:border-gray-600
+        focus:ring-blue-500 focus:ring-offset-white
+        dark:focus:ring-offset-gray-800
+      `}
+      {...props}
+    >
+      {children}
+    </Button>
+  );
+}
+```
+
+## 🚀 Development Workflow
+
+### Accessibility-First Development
+1. **Design Phase**: Consider accessibility requirements from the start
+2. **Implementation**: Use semantic HTML and ARIA attributes
+3. **Testing**: Run automated and manual accessibility tests
+4. **Review**: Conduct accessibility reviews with team members
+5. **User Testing**: Test with actual users who use assistive technologies
+
+### Integration with Development Tools
+```bash
+# Install accessibility testing tools
+npm install --save-dev @axe-core/react jest-axe
+
+# Run accessibility tests in CI/CD
+npm run test:a11y
+
+# Lint for accessibility issues
+npm run lint:a11y
+```
+
+### Storybook Integration
+Every component story includes accessibility testing:
+
+```tsx
+// Component.stories.tsx
+import type { Meta, StoryObj } from '@storybook/react';
+import { Button } from './Button';
+
+const meta: Meta<typeof Button> = {
+  title: 'Components/Button',
+  component: Button,
+  parameters: {
+    a11y: {
+      // Configure axe-core rules
+      config: {
+        rules: [
+          {
+            id: 'color-contrast',
+            enabled: true,
+          },
+        ],
+      },
+    },
+  },
+};
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+export const Primary: Story = {
+  args: {
+    variant: 'primary',
+    children: 'Primary Button',
+  },
+  parameters: {
+    a11y: {
+      // Additional accessibility notes
+      manual: {
+        description: 'Test keyboard navigation with Tab and Enter keys',
+      },
+    },
+  },
+};
+
+export const Disabled: Story = {
+  args: {
+    variant: 'primary',
+    disabled: true,
+    children: 'Disabled Button',
+  },
+  play: async ({ canvasElement }) => {
+    // Test that disabled button is not focusable
+    const button = canvasElement.querySelector('button');
+    expect(button).toHaveAttribute('disabled');
+    expect(button).toHaveAttribute('aria-disabled', 'true');
+  },
+};
+```
+
+## 📋 QA Testing Checklist
+
+### For Development Phase
+- [ ] Semantic HTML elements used appropriately
+- [ ] All interactive elements are keyboard accessible
+- [ ] ARIA labels and roles added where needed
+- [ ] Color contrast meets WCAG AA standards
+- [ ] Focus indicators are visible and clear
+- [ ] Error messages are associated with form fields
+
+### For QA Phase  
+- [ ] Run automated accessibility tests (axe-core)
+- [ ] Test with keyboard navigation only
+- [ ] Test with screen reader (at least NVDA or VoiceOver)
+- [ ] Test color perception (use color blindness simulators)
+- [ ] Test with 200% browser zoom
+- [ ] Verify proper heading hierarchy (h1, h2, h3...)
+
+### For User Testing Phase
+- [ ] Test with users who use assistive technologies
+- [ ] Gather feedback on ease of use
+- [ ] Verify that content is understandable
+- [ ] Test task completion rates
+- [ ] Document and address user-reported issues
+
+## 🔗 Resources & Tools
+
+### Testing Tools
+- **[axe-core](https://github.com/dequelabs/axe-core)**: Automated accessibility testing
+- **[jest-axe](https://github.com/nickcolley/jest-axe)**: Jest integration for axe-core
+- **[Pa11y](https://pa11y.org/)**: Command line accessibility testing
+- **[Lighthouse](https://developers.google.com/web/tools/lighthouse)**: Performance and accessibility auditing
+
+### Browser Extensions  
+- **[axe DevTools](https://www.deque.com/axe/devtools/)**: Browser extension for accessibility testing
+- **[Accessibility Insights](https://accessibilityinsights.io/)**: Microsoft's accessibility testing tools
+- **[Colour Contrast Analyser](https://www.tpgi.com/color-contrast-checker/)**: Color contrast testing
+
+### Screen Readers
+- **[NVDA](https://www.nvaccess.org/)**: Free Windows screen reader
+- **[VoiceOver](https://support.apple.com/guide/voiceover/)**: Built-in macOS screen reader
+- **[JAWS](https://www.freedomscientific.com/products/software/jaws/)**: Popular Windows screen reader
+
+### Guidelines & Documentation
+- **[WCAG 2.1 Guidelines](https://www.w3.org/WAI/WCAG21/quickref/)**: Official accessibility guidelines
+- **[ARIA Authoring Practices](https://www.w3.org/WAI/ARIA/apg/)**: Patterns and best practices
+- **[WebAIM](https://webaim.org/)**: Accessibility training and resources
+
+---
+
+Accessibility is not just about compliance—it's about creating inclusive experiences that work for everyone. Our component library makes accessibility the default, so you can build better products for all users. 

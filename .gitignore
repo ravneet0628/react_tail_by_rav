@@ -1,5 +1,5 @@
 # Documentation (local development only)
-docs/
+/docs
 
 # Dependencies
 node_modules
