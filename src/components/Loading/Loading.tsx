@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react';
+import { forwardRef, useId } from 'react';
 import { Loader2 } from 'lucide-react';
 import type { LoadingProps } from './Loading.types';
 import { cn } from '../../utils';
@@ -27,6 +27,9 @@ export const Loading = forwardRef<HTMLDivElement, LoadingProps>(
     },
     ref
   ) => {
+    // Generate unique ID for accessibility
+    const loadingId = useId();
+    
     // Size classes
     const sizeClasses = {
       xs: 'w-4 h-4',
@@ -47,166 +50,121 @@ export const Loading = forwardRef<HTMLDivElement, LoadingProps>(
       '2xl': 'text-2xl',
     } as const;
 
-    // Color classes
-    const colorClasses = {
-      primary: 'text-primary-500',
-      secondary: 'text-secondary-500',
-      success: 'text-success-500',
-      warning: 'text-warning-500',
-      error: 'text-error-500',
-    } as Record<string, string>;
-
+    // Color classes - including all ComponentColor variants
+    const colorClasses: Record<string, string> = {
+      primary: 'text-[oklch(var(--color-primary-500))]',
+      secondary: 'text-[oklch(0.5_0_0)]',
+      accent: 'text-[oklch(var(--color-primary-500))]',
+      success: 'text-[oklch(var(--color-success-500))]',
+      warning: 'text-[oklch(var(--color-warning-500))]',
+      error: 'text-[oklch(var(--color-danger-500))]',
+      info: 'text-[oklch(var(--color-primary-500))]',
+      gray: 'text-[oklch(0.5_0_0)]',
+      neutral: 'text-[oklch(0.5_0_0)]',
+      transparent: 'text-[oklch(0.5_0_0)]',
+    };
+  
     const sizeClass = sizeClasses[size];
     const textSizeClass = textSizeClasses[size];
-    const colorClass = colorClasses[color] || 'text-primary-500';
+    const colorClass = colorClasses[color] || 'text-[oklch(var(--color-primary-500))]';
 
-    // Render different loading variants
-    const renderLoadingIndicator = () => {
+    // Base container styles
+    const containerStyles = cn(
+      'flex items-center justify-center',
+      size === 'xs' && 'space-x-1',
+      size === 'sm' && 'space-x-1.5', 
+      size === 'md' && 'space-x-2',
+      size === 'lg' && 'space-x-3',
+      size === 'xl' && 'space-x-4',
+      fullScreen && 'fixed inset-0 bg-white/80 dark:bg-[oklch(0.1_0_0/0.8)] z-50',
+      className
+    );
+
+    // Render content based on variant
+    const renderLoadingContent = () => {
       switch (variant) {
-        case 'spinner':
-          return (
-            <Loader2 
-              className={cn('animate-spin', sizeClass, colorClass)} 
-              aria-hidden="true"
-            />
-          );
-
         case 'dots':
           return (
-            <div className="flex space-x-1" aria-hidden="true">
-              {[0, 1, 2].map((i) => (
+            <div className={cn('flex space-x-1', colorClass)}>
+              {[1, 2, 3].map((dot) => (
                 <div
-                  key={i}
+                  key={dot}
                   className={cn(
                     'rounded-full animate-pulse',
-                    sizeClass,
-                    colorClass.replace('text-', 'bg-')
+                    sizeClass.replace('w-', 'w-2 h-2').replace('h-', '')
                   )}
                   style={{
-                    animationDelay: `${i * 0.2}s`,
-                    animationDuration: '1s',
+                    animationDelay: `${dot * 0.2}s`,
+                    backgroundColor: 'currentColor',
                   }}
                 />
               ))}
-            </div>
-          );
-
-        case 'bars':
-          return (
-            <div className="flex space-x-1" aria-hidden="true">
-              {[0, 1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className={cn(
-                    'w-1 animate-pulse',
-                    colorClass.replace('text-', 'bg-')
-                  )}
-                  style={{
-                    height: `${Math.random() * 20 + 10}px`,
-                    animationDelay: `${i * 0.1}s`,
-                    animationDuration: '1.2s',
-                  }}
-                />
-              ))}
-            </div>
-          );
-
-        case 'pulse':
-          return (
-            <div
-              className={cn(
-                'rounded-full animate-pulse',
-                sizeClass,
-                colorClass.replace('text-', 'bg-')
-              )}
-              aria-hidden="true"
-            />
-          );
-
-        case 'skeleton':
-          return (
-            <div className="space-y-3" aria-hidden="true">
-              <div className="animate-pulse bg-gray-300 dark:bg-gray-600 h-4 rounded w-3/4" />
-              <div className="animate-pulse bg-gray-300 dark:bg-gray-600 h-4 rounded w-1/2" />
-              <div className="animate-pulse bg-gray-300 dark:bg-gray-600 h-4 rounded w-5/6" />
             </div>
           );
 
         case 'progress':
           return (
-            <div className="w-full" aria-hidden="true">
-              <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
-                <div
+            <div className="w-full max-w-md">
+              <div className="bg-[oklch(0.9_0_0)] rounded-full h-2 dark:bg-[oklch(0.3_0_0)]">
+                <div 
                   className={cn(
                     'h-2 rounded-full transition-all duration-300',
-                    colorClass.replace('text-', 'bg-')
+                    color === 'primary' && 'bg-[oklch(var(--color-primary-500))]',
+                    color === 'secondary' && 'bg-[oklch(0.5_0_0)]',
+                    color === 'success' && 'bg-[oklch(var(--color-success-500))]',
+                    color === 'warning' && 'bg-[oklch(var(--color-warning-500))]',
+                    color === 'error' && 'bg-[oklch(var(--color-danger-500))]',
                   )}
-                  style={{ width: `${Math.min(Math.max(progress, 0), 100)}%` }}
+                  style={{ width: `${progress}%` }}
                 />
               </div>
-              {progress > 0 && (
-                <div className="text-center mt-2 text-sm text-gray-600 dark:text-gray-400">
-                  {Math.round(progress)}%
+              {progress !== undefined && (
+                <div className="text-sm text-[oklch(0.5_0_0)] dark:text-[oklch(0.6_0_0)] mt-2 text-center">
+                  {progress}%
                 </div>
               )}
             </div>
           );
 
-        case 'linear':
+        case 'pulse':
           return (
-            <div className="w-full overflow-hidden bg-gray-200 rounded dark:bg-gray-700" aria-hidden="true">
-              <div
-                className={cn(
-                  'h-1 animate-bounce',
-                  colorClass.replace('text-', 'bg-')
-                )}
-                style={{
-                  width: '30%',
-                }}
-              />
-            </div>
+            <div className={cn('animate-pulse rounded-full', sizeClass, colorClass)} 
+                 style={{ backgroundColor: 'currentColor' }} />
           );
 
+        case 'spinner':
         default:
-          return null;
+          return (
+            <Loader2 
+              className={cn('animate-spin', sizeClass, colorClass)}
+              aria-hidden="true"
+            />
+          );
       }
     };
 
-    // Container classes
-    const containerClasses = cn(
-      'flex flex-col items-center justify-center gap-3',
-      fullScreen && 'fixed inset-0 bg-white/80 dark:bg-gray-900/80 z-50',
-      className
-    );
-
     return (
-      <div
+      <div 
         ref={ref}
-        className={containerClasses}
+        id={loadingId}
+        className={containerStyles}
         role="status"
+        aria-live="polite"
         aria-label={text || 'Loading'}
         {...props}
       >
-        {renderLoadingIndicator()}
-        
-        {/* Loading text */}
-        {text && (
-          <div className={cn('text-gray-600 dark:text-gray-400 font-medium', textSizeClass)}>
-            {text}
-          </div>
-        )}
-
-        {/* Additional content */}
-        {children && (
-          <div className={textSizeClass}>
-            {children}
-          </div>
-        )}
-
-        {/* Screen reader text */}
-        <span className="sr-only">
-          {text || 'Loading, please wait...'}
-        </span>
+        <div className={cn(
+          'flex flex-col items-center gap-3',
+          text && variant !== 'progress' && 'space-y-2'
+        )}>
+          {renderLoadingContent()}
+          {text && variant !== 'progress' && (
+            <p className={cn('text-center', textSizeClass, colorClass)}>
+              {text}
+            </p>
+          )}
+          {children}
+        </div>
       </div>
     );
   }

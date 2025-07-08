@@ -1,14 +1,4 @@
-// Components
-export * from './components';
-
-// Utilities
-export * from './utils';
-
-// Types
-export * from './types';
-
-// Hooks
-export * from './hooks';
-
-// Styles
-import './styles/globals.css';
+// Main component exports
+export { Button } from './components/Button';
+export { Card } from './components/Card';
+export { TestTailwind } from './components/TestTailwind';

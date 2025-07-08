@@ -1,10 +1,10 @@
-import React, { useRef } from 'react';
+import { useRef, useId } from 'react';
 import type { AvatarProps } from './Avatar.types';
 import { getAvatarStyles } from './Avatar.styles';
 import { cn } from '../../utils';
 import { User, Camera } from 'lucide-react';
 
-export const Avatar: React.FC<AvatarProps> = ({
+export const Avatar = ({
   variant = 'image',
   size = 'md',
   src,
@@ -14,8 +14,10 @@ export const Avatar: React.FC<AvatarProps> = ({
   icon,
   onUpload,
   className,
-}) => {
+}: AvatarProps) => {
   const fileRef = useRef<HTMLInputElement>(null);
+  const avatarId = useId();
+  const fileInputId = useId();
 
   const handleUploadClick = () => {
     fileRef.current?.click();
@@ -55,6 +57,7 @@ export const Avatar: React.FC<AvatarProps> = ({
 
   return (
     <div
+      id={avatarId}
       className={styles}
       onClick={variant === 'upload' ? handleUploadClick : undefined}
       role="img"
@@ -66,12 +69,13 @@ export const Avatar: React.FC<AvatarProps> = ({
           className={cn(
             'absolute bottom-0 right-0 block rounded-full ring-2 ring-white',
             {
-              'w-2 h-2 bg-green-500': status === 'online',
-              'w-2 h-2 bg-gray-400': status === 'offline',
-              'w-2 h-2 bg-yellow-400': status === 'away',
-              'w-2 h-2 bg-red-500': status === 'busy',
+              'w-2 h-2 bg-[oklch(var(--color-success-500))]': status === 'online',
+              'w-2 h-2 bg-[oklch(0.5_0_0)]': status === 'offline',
+              'w-2 h-2 bg-[oklch(var(--color-warning-500))]': status === 'away',
+              'w-2 h-2 bg-[oklch(var(--color-danger-500))]': status === 'busy',
             }
           )}
+          aria-label={`Status: ${status}`}
         />
       )}
       {variant === 'upload' && (
@@ -82,10 +86,12 @@ export const Avatar: React.FC<AvatarProps> = ({
       {variant === 'upload' && (
         <input
           ref={fileRef}
+          id={fileInputId}
           type="file"
           accept="image/*"
           className="hidden"
           onChange={handleFileChange}
+          aria-label="Upload image"
         />
       )}
     </div>

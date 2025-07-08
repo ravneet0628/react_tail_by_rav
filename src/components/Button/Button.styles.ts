@@ -1,172 +1,139 @@
-import { cva } from '../../utils';
-import type { ComponentSize } from '../../types';
-import type { ButtonConfig } from './Button.types';
+import type { ComponentSize, ComponentColor } from '../../types';
+import { cn } from '../../utils';
 
-// Base button styles that apply to all variants
-const baseStyles = [
-  'inline-flex',
-  'items-center',
-  'justify-center',
-  'font-medium',
-  'transition-all',
-  'duration-200',
-  'border',
-  'focus:outline-none',
-  'focus:ring-2',
-  'focus:ring-offset-2',
-  'disabled:cursor-not-allowed',
-  'disabled:opacity-50',
-].join(' ');
+// Base button styles - clean and simple
+const baseStyles = cn(
+  'inline-flex items-center justify-center gap-2',
+  'font-medium text-center leading-normal',
+  'border rounded-lg',
+  'transition-colors duration-200',
+  'focus:outline-none focus:ring-2 focus:ring-offset-2',
+  'disabled:opacity-50 disabled:cursor-not-allowed',
+  'cursor-pointer select-none'
+);
 
-// Size variants
-const sizeVariants = {
-  xs: 'px-2 py-1 text-xs rounded gap-1',
-  sm: 'px-3 py-1.5 text-sm rounded gap-1.5',
-  md: 'px-4 py-2 text-sm rounded-md gap-2',
-  lg: 'px-6 py-3 text-base rounded-md gap-2',
-  xl: 'px-8 py-4 text-lg rounded-lg gap-3',
-  '2xl': 'px-10 py-5 text-xl rounded-lg gap-3',
+// Size variants with proper touch targets
+const sizeVariants: Record<ComponentSize, string> = {
+  xs: 'h-8 px-3 text-xs min-w-16',      // 32px height
+  sm: 'h-10 px-4 text-sm min-w-20',     // 40px height  
+  md: 'h-11 px-6 text-base min-w-24',   // 44px height - optimal
+  lg: 'h-12 px-8 text-lg min-w-28',     // 48px height
+  xl: 'h-14 px-10 text-xl min-w-32',    // 56px height
+  '2xl': 'h-16 px-12 text-2xl min-w-36' // 64px height
 };
 
-// Variant and color combinations
-const variantStyles = {
+// Icon-only button sizes (square)
+const iconOnlySizes: Record<ComponentSize, string> = {
+  xs: 'w-8 h-8 p-0',
+  sm: 'w-10 h-10 p-0',
+  md: 'w-11 h-11 p-0',
+  lg: 'w-12 h-12 p-0',
+  xl: 'w-14 h-14 p-0',
+  '2xl': 'w-16 h-16 p-0'
+};
+
+// Color variants
+const colorVariants = {
   primary: {
-    primary: 'bg-primary-500 text-white border-primary-500 hover:bg-primary-600 focus:ring-primary-500 dark:bg-primary-600 dark:hover:bg-primary-700',
-    secondary: 'bg-secondary-500 text-white border-secondary-500 hover:bg-secondary-600 focus:ring-secondary-500 dark:bg-secondary-600 dark:hover:bg-secondary-700',
-    success: 'bg-success-500 text-white border-success-500 hover:bg-success-600 focus:ring-success-500 dark:bg-success-600 dark:hover:bg-success-700',
-    warning: 'bg-warning-500 text-white border-warning-500 hover:bg-warning-600 focus:ring-warning-500 dark:bg-warning-600 dark:hover:bg-warning-700',
-    error: 'bg-error-500 text-white border-error-500 hover:bg-error-600 focus:ring-error-500 dark:bg-error-600 dark:hover:bg-error-700',
-    neutral: 'bg-gray-500 text-white border-gray-500 hover:bg-gray-600 focus:ring-gray-500 dark:bg-gray-600 dark:hover:bg-gray-700',
+    solid: 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700 focus:ring-blue-500',
+    outline: 'bg-transparent text-blue-600 border-blue-600 hover:bg-blue-50 focus:ring-blue-500',
+    ghost: 'bg-transparent text-blue-600 border-transparent hover:bg-blue-50 focus:ring-blue-500'
   },
   secondary: {
-    primary: 'bg-primary-50 text-primary-700 border-primary-200 hover:bg-primary-100 focus:ring-primary-500 dark:bg-primary-900/20 dark:text-primary-300 dark:border-primary-800 dark:hover:bg-primary-900/30',
-    secondary: 'bg-secondary-50 text-secondary-700 border-secondary-200 hover:bg-secondary-100 focus:ring-secondary-500 dark:bg-secondary-900/20 dark:text-secondary-300 dark:border-secondary-800 dark:hover:bg-secondary-900/30',
-    success: 'bg-success-50 text-success-700 border-success-200 hover:bg-success-100 focus:ring-success-500 dark:bg-success-900/20 dark:text-success-300 dark:border-success-800 dark:hover:bg-success-900/30',
-    warning: 'bg-warning-50 text-warning-700 border-warning-200 hover:bg-warning-100 focus:ring-warning-500 dark:bg-warning-900/20 dark:text-warning-300 dark:border-warning-800 dark:hover:bg-warning-900/30',
-    error: 'bg-error-50 text-error-700 border-error-200 hover:bg-error-100 focus:ring-error-500 dark:bg-error-900/20 dark:text-error-300 dark:border-error-800 dark:hover:bg-error-900/30',
-    neutral: 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100 focus:ring-gray-500 dark:bg-gray-900/20 dark:text-gray-300 dark:border-gray-800 dark:hover:bg-gray-900/30',
+    solid: 'bg-gray-600 text-white border-gray-600 hover:bg-gray-700 focus:ring-gray-500',
+    outline: 'bg-transparent text-gray-600 border-gray-600 hover:bg-gray-50 focus:ring-gray-500',
+    ghost: 'bg-transparent text-gray-600 border-transparent hover:bg-gray-50 focus:ring-gray-500'
   },
-  outline: {
-    primary: 'bg-transparent text-primary-600 border-primary-300 hover:bg-primary-50 focus:ring-primary-500 dark:text-primary-400 dark:border-primary-600 dark:hover:bg-primary-900/20',
-    secondary: 'bg-transparent text-secondary-600 border-secondary-300 hover:bg-secondary-50 focus:ring-secondary-500 dark:text-secondary-400 dark:border-secondary-600 dark:hover:bg-secondary-900/20',
-    success: 'bg-transparent text-success-600 border-success-300 hover:bg-success-50 focus:ring-success-500 dark:text-success-400 dark:border-success-600 dark:hover:bg-success-900/20',
-    warning: 'bg-transparent text-warning-600 border-warning-300 hover:bg-warning-50 focus:ring-warning-500 dark:text-warning-400 dark:border-warning-600 dark:hover:bg-warning-900/20',
-    error: 'bg-transparent text-error-600 border-error-300 hover:bg-error-50 focus:ring-error-500 dark:text-error-400 dark:border-error-600 dark:hover:bg-error-900/20',
-    neutral: 'bg-transparent text-gray-600 border-gray-300 hover:bg-gray-50 focus:ring-gray-500 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-900/20',
+  success: {
+    solid: 'bg-green-600 text-white border-green-600 hover:bg-green-700 focus:ring-green-500',
+    outline: 'bg-transparent text-green-600 border-green-600 hover:bg-green-50 focus:ring-green-500',
+    ghost: 'bg-transparent text-green-600 border-transparent hover:bg-green-50 focus:ring-green-500'
   },
-  ghost: {
-    primary: 'bg-transparent text-primary-600 border-transparent hover:bg-primary-50 focus:ring-primary-500 dark:text-primary-400 dark:hover:bg-primary-900/20',
-    secondary: 'bg-transparent text-secondary-600 border-transparent hover:bg-secondary-50 focus:ring-secondary-500 dark:text-secondary-400 dark:hover:bg-secondary-900/20',
-    success: 'bg-transparent text-success-600 border-transparent hover:bg-success-50 focus:ring-success-500 dark:text-success-400 dark:hover:bg-success-900/20',
-    warning: 'bg-transparent text-warning-600 border-transparent hover:bg-warning-50 focus:ring-warning-500 dark:text-warning-400 dark:hover:bg-warning-900/20',
-    error: 'bg-transparent text-error-600 border-transparent hover:bg-error-50 focus:ring-error-500 dark:text-error-400 dark:hover:bg-error-900/20',
-    neutral: 'bg-transparent text-gray-600 border-transparent hover:bg-gray-50 focus:ring-gray-500 dark:text-gray-400 dark:hover:bg-gray-900/20',
+  warning: {
+    solid: 'bg-yellow-600 text-white border-yellow-600 hover:bg-yellow-700 focus:ring-yellow-500',
+    outline: 'bg-transparent text-yellow-600 border-yellow-600 hover:bg-yellow-50 focus:ring-yellow-500',
+    ghost: 'bg-transparent text-yellow-600 border-transparent hover:bg-yellow-50 focus:ring-yellow-500'
   },
-  link: {
-    primary: 'bg-transparent text-primary-600 border-transparent hover:text-primary-700 hover:underline focus:ring-primary-500 p-0 dark:text-primary-400 dark:hover:text-primary-300',
-    secondary: 'bg-transparent text-secondary-600 border-transparent hover:text-secondary-700 hover:underline focus:ring-secondary-500 p-0 dark:text-secondary-400 dark:hover:text-secondary-300',
-    success: 'bg-transparent text-success-600 border-transparent hover:text-success-700 hover:underline focus:ring-success-500 p-0 dark:text-success-400 dark:hover:text-success-300',
-    warning: 'bg-transparent text-warning-600 border-transparent hover:text-warning-700 hover:underline focus:ring-warning-500 p-0 dark:text-warning-400 dark:hover:text-warning-300',
-    error: 'bg-transparent text-error-600 border-transparent hover:text-error-700 hover:underline focus:ring-error-500 p-0 dark:text-error-400 dark:hover:text-error-300',
-    neutral: 'bg-transparent text-gray-600 border-transparent hover:text-gray-700 hover:underline focus:ring-gray-500 p-0 dark:text-gray-400 dark:hover:text-gray-300',
-  },
-  icon: {
-    primary: 'bg-transparent text-primary-600 border-transparent hover:bg-primary-50 focus:ring-primary-500 dark:text-primary-400 dark:hover:bg-primary-900/20',
-    secondary: 'bg-transparent text-secondary-600 border-transparent hover:bg-secondary-50 focus:ring-secondary-500 dark:text-secondary-400 dark:hover:bg-secondary-900/20',
-    success: 'bg-transparent text-success-600 border-transparent hover:bg-success-50 focus:ring-success-500 dark:text-success-400 dark:hover:bg-success-900/20',
-    warning: 'bg-transparent text-warning-600 border-transparent hover:bg-warning-50 focus:ring-warning-500 dark:text-warning-400 dark:hover:bg-warning-900/20',
-    error: 'bg-transparent text-error-600 border-transparent hover:bg-error-50 focus:ring-error-500 dark:text-error-400 dark:hover:bg-error-900/20',
-    neutral: 'bg-transparent text-gray-600 border-transparent hover:bg-gray-50 focus:ring-gray-500 dark:text-gray-400 dark:hover:bg-gray-900/20',
-  },
-  floating: {
-    primary: 'bg-primary-500 text-white border-primary-500 hover:bg-primary-600 focus:ring-primary-500 shadow-lg hover:shadow-xl rounded-full dark:bg-primary-600 dark:hover:bg-primary-700',
-    secondary: 'bg-secondary-500 text-white border-secondary-500 hover:bg-secondary-600 focus:ring-secondary-500 shadow-lg hover:shadow-xl rounded-full dark:bg-secondary-600 dark:hover:bg-secondary-700',
-    success: 'bg-success-500 text-white border-success-500 hover:bg-success-600 focus:ring-success-500 shadow-lg hover:shadow-xl rounded-full dark:bg-success-600 dark:hover:bg-success-700',
-    warning: 'bg-warning-500 text-white border-warning-500 hover:bg-warning-600 focus:ring-warning-500 shadow-lg hover:shadow-xl rounded-full dark:bg-warning-600 dark:hover:bg-warning-700',
-    error: 'bg-error-500 text-white border-error-500 hover:bg-error-600 focus:ring-error-500 shadow-lg hover:shadow-xl rounded-full dark:bg-error-600 dark:hover:bg-error-700',
-    neutral: 'bg-gray-500 text-white border-gray-500 hover:bg-gray-600 focus:ring-gray-500 shadow-lg hover:shadow-xl rounded-full dark:bg-gray-600 dark:hover:bg-gray-700',
-  },
+  error: {
+    solid: 'bg-red-600 text-white border-red-600 hover:bg-red-700 focus:ring-red-500',
+    outline: 'bg-transparent text-red-600 border-red-600 hover:bg-red-50 focus:ring-red-500',
+    ghost: 'bg-transparent text-red-600 border-transparent hover:bg-red-50 focus:ring-red-500'
+  }
 };
 
-// Icon-only sizes (square buttons)
-const iconOnlySizes = {
-  xs: 'w-6 h-6 p-1',
-  sm: 'w-8 h-8 p-1.5',
-  md: 'w-10 h-10 p-2',
-  lg: 'w-12 h-12 p-3',
-  xl: 'w-16 h-16 p-4',
-  '2xl': 'w-20 h-20 p-5',
-};
+// Variant styles
+type ButtonVariant = 'solid' | 'outline' | 'ghost';
 
-// Loading state styles
-const loadingStyles = 'cursor-wait';
+export interface ButtonConfig {
+  variant?: ButtonVariant;
+  color?: ComponentColor;
+  size: ComponentSize;
+  loading?: boolean;
+  fullWidth?: boolean;
+  iconOnly?: boolean;
+}
 
-// Full width styles
-const fullWidthStyles = 'w-full';
-
+/**
+ * Generates button class string based on configuration
+ */
 export function getButtonStyles(config: ButtonConfig): string {
   const {
-    variant,
-    color,
+    variant = 'solid',
+    color = 'primary',
     size,
     loading,
     fullWidth,
     iconOnly,
   } = config;
 
-  // Get the appropriate size styles
-  const sizeStyle = iconOnly ? iconOnlySizes[size] : sizeVariants[size];
+  // Get size classes
+  const sizeClasses = iconOnly ? iconOnlySizes[size] : sizeVariants[size];
   
-  // Get variant and color specific styles
-  const variantStyle = variantStyles[variant][color];
+  // Get color classes - handle missing color gracefully
+  const colorClasses = colorVariants[color]?.[variant] || colorVariants.primary[variant];
 
-  // Build the complete class string
-  return cva(
-    baseStyles,
-    {
-      size: { [size]: sizeStyle },
-      variant: { [variant]: variantStyle },
-      loading: { true: loadingStyles, false: '' },
-      fullWidth: { true: fullWidthStyles, false: '' },
-    },
-    {
-      size,
-      variant,
-      loading: loading.toString() as 'true' | 'false',
-      fullWidth: fullWidth.toString() as 'true' | 'false',
-    }
-  );
+  // Build classes array
+  const classes = [baseStyles, sizeClasses, colorClasses];
+  
+  if (loading) {
+    classes.push('opacity-75 cursor-wait');
+  }
+  
+  if (fullWidth) {
+    classes.push('w-full');
+  }
+  
+  return cn(...classes);
 }
 
-// Helper function to get icon styles
-export function getIconStyles(size: ComponentSize, position: 'left' | 'right'): string {
+/**
+ * Icon sizing based on button size
+ */
+export function getIconStyles(size: ComponentSize): string {
   const iconSizes = {
     xs: 'w-3 h-3',
-    sm: 'w-4 h-4',
-    md: 'w-4 h-4',
+    sm: 'w-4 h-4', 
+    md: 'w-5 h-5',
     lg: 'w-5 h-5',
     xl: 'w-6 h-6',
-    '2xl': 'w-6 h-6',
-  } as const;
-
-  const positionStyles = {
-    left: '-ml-0.5',
-    right: '-mr-0.5',
-  } as const;
-
-  return `${iconSizes[size]} ${positionStyles[position]}`;
+    '2xl': 'w-7 h-7'
+  };
+  
+  return iconSizes[size];
 }
 
-// Helper function to get loading spinner styles
+/**
+ * Spinner sizing for loading states
+ */
 export function getSpinnerStyles(size: ComponentSize): string {
   const spinnerSizes = {
     xs: 'w-3 h-3',
     sm: 'w-4 h-4',
-    md: 'w-4 h-4',
+    md: 'w-4 h-4', 
     lg: 'w-5 h-5',
-    xl: 'w-6 h-6',
-    '2xl': 'w-6 h-6',
-  } as const;
-
-  return `${spinnerSizes[size]} animate-spin`;
+    xl: 'w-5 h-5',
+    '2xl': 'w-6 h-6'
+  };
+  
+  return cn('animate-spin', spinnerSizes[size]);
 }

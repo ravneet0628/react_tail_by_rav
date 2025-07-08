@@ -1,114 +1,130 @@
-import { cva, cn } from '../../utils';
-import type { ComponentSize } from '../../types';
+import type { ComponentSize, ComponentColor } from '../../types';
+import { cn } from '../../utils';
 
-export interface InputStyleConfig {
-  size: ComponentSize;
-  error: boolean;
-  disabled: boolean;
-  hasIconLeft: boolean;
-  hasIconRight: boolean;
-}
+// Base input styles
+const baseStyles = cn(
+  'w-full rounded-lg border border-gray-300',
+  'bg-white text-gray-900 placeholder-gray-500',
+  'transition-colors duration-200',
+  'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
+  'disabled:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60'
+);
 
-// Base styles shared across variants
-const baseFieldStyles = [
-  'block',
-  'w-full',
-  'border',
-  'rounded-md',
-  'transition-colors',
-  'duration-200',
-  'placeholder-gray-400',
-  'focus:outline-none',
-  'focus:ring-2',
-  'focus:ring-primary-500',
-  'focus:border-primary-500',
-  'dark:bg-gray-800',
-  'dark:border-gray-700',
-  'dark:text-gray-100',
-  'dark:placeholder-gray-500',
-].join(' ');
-
-// Size styles
-const sizeStyles = {
-  xs: 'text-xs px-2 py-1',
-  sm: 'text-sm px-3 py-1.5',
-  md: 'text-sm px-4 py-2',
-  lg: 'text-base px-5 py-3',
-  xl: 'text-lg px-6 py-3.5',
-  '2xl': 'text-xl px-8 py-4',
-} as const;
-
-// Error styles
-const errorStyles = 'border-error-500 text-error-600 placeholder-error-400 focus:ring-error-500';
-
-// Disabled styles
-const disabledStyles = 'bg-gray-100 dark:bg-gray-700 opacity-60 cursor-not-allowed placeholder-opacity-60';
-
-// Padding adjustment when icons present
-const iconLeftStyles: Record<ComponentSize, string> = {
-  xs: 'pl-8',
-  sm: 'pl-9',
-  md: 'pl-10',
-  lg: 'pl-11',
-  xl: 'pl-12',
-  '2xl': 'pl-14',
+// Size variants with proper touch targets
+const sizeVariants: Record<ComponentSize, string> = {
+  xs: 'h-8 px-3 text-xs',        // 32px height
+  sm: 'h-10 px-3 text-sm',       // 40px height
+  md: 'h-11 px-4 text-base',     // 44px height - optimal
+  lg: 'h-12 px-4 text-lg',       // 48px height
+  xl: 'h-14 px-6 text-xl',       // 56px height
+  '2xl': 'h-16 px-8 text-2xl'    // 64px height
 };
 
-const iconRightStyles: Record<ComponentSize, string> = {
-  xs: 'pr-8',
-  sm: 'pr-9',
-  md: 'pr-10',
-  lg: 'pr-11',
-  xl: 'pr-12',
-  '2xl': 'pr-14',
+// State colors for validation
+const stateStyles: Record<ComponentColor, string> = {
+  primary: 'border-blue-500 focus:ring-blue-500 focus:border-blue-600',
+  secondary: 'border-gray-500 focus:ring-gray-500 focus:border-gray-600',
+  accent: 'border-purple-500 focus:ring-purple-500 focus:border-purple-600',
+  success: 'border-green-500 focus:ring-green-500 focus:border-green-600',
+  warning: 'border-yellow-500 focus:ring-yellow-500 focus:border-yellow-600',
+  error: 'border-red-500 focus:ring-red-500 focus:border-red-600',
+  info: 'border-cyan-500 focus:ring-cyan-500 focus:border-cyan-600',
+  gray: 'border-gray-400 focus:ring-gray-400 focus:border-gray-500',
+  neutral: 'border-gray-400 focus:ring-gray-400 focus:border-gray-500',
+  transparent: 'border-transparent focus:ring-gray-400 focus:border-gray-400',
 };
 
-export function getInputFieldStyles(config: InputStyleConfig): string {
-  const { size, error, disabled, hasIconLeft, hasIconRight } = config;
-
-  return cva(
-    baseFieldStyles,
-    {
-      size: { [size]: sizeStyles[size] },
-      error: { true: errorStyles, false: '' },
-      disabled: { true: disabledStyles, false: '' },
-      iconLeft: { true: iconLeftStyles[size], false: '' },
-      iconRight: { true: iconRightStyles[size], false: '' },
-    },
-    {
-      size,
-      error: error.toString() as 'true' | 'false',
-      disabled: disabled.toString() as 'true' | 'false',
-      iconLeft: hasIconLeft.toString() as 'true' | 'false',
-      iconRight: hasIconRight.toString() as 'true' | 'false',
-    }
-  );
+/**
+ * Generates input class string based on configuration
+ */
+export function getInputStyles(
+  size: ComponentSize, 
+  variant: 'default' | 'filled' | 'outlined' = 'default', 
+  state?: ComponentColor, 
+  disabled = false
+): string {
+  const classes = [baseStyles, sizeVariants[size]];
+  
+  // Add variant styles
+  if (variant === 'filled') {
+    classes.push('bg-gray-50');
+  } else if (variant === 'outlined') {
+    classes.push('border-2');
+  }
+  
+  // Add state styles
+  if (state && stateStyles[state]) {
+    classes.push(stateStyles[state]);
+  }
+  
+  return cn(...classes);
 }
 
-export function getLabelStyles(error: boolean): string {
-  return cn(
-    'block mb-1 font-medium text-sm',
-    error ? 'text-error-600 dark:text-error-500' : 'text-gray-700 dark:text-gray-200'
-  );
+/**
+ * Generates label class string
+ */
+export function getLabelStyles(size: ComponentSize, required = false): string {
+  const sizeClasses = {
+    xs: 'text-xs mb-1',
+    sm: 'text-sm mb-1.5',
+    md: 'text-base mb-2',
+    lg: 'text-lg mb-2.5',
+    xl: 'text-xl mb-3',
+    '2xl': 'text-2xl mb-4',
+  };
+
+  const classes = ['block font-medium text-gray-700', sizeClasses[size]];
+  
+  if (required) {
+    classes.push("after:content-['*'] after:text-red-500 after:ml-1");
+  }
+
+  return cn(...classes);
 }
 
-export function getHelperTextStyles(error: boolean): string {
-  return cn(
-    'mt-1 text-xs',
-    error ? 'text-error-600 dark:text-error-500' : 'text-gray-500 dark:text-gray-400'
-  );
+/**
+ * Generates helper text class string
+ */
+export function getHelperTextStyles(state?: ComponentColor): string {
+  const stateColors = {
+    primary: 'text-blue-600',
+    secondary: 'text-gray-600',
+    accent: 'text-purple-600',
+    success: 'text-green-600',
+    warning: 'text-yellow-600',
+    error: 'text-red-600',
+    info: 'text-cyan-600',
+    gray: 'text-gray-500',
+    neutral: 'text-gray-500',
+    transparent: 'text-gray-500',
+  };
+
+  const color = state ? stateColors[state] : stateColors.neutral;
+  
+  return cn('text-xs mt-1.5', color);
 }
 
+/**
+ * Generates icon wrapper class string
+ */
 export function getIconWrapperStyles(position: 'left' | 'right', size: ComponentSize): string {
-  const base = 'absolute inset-y-0 flex items-center pointer-events-none';
-  const translate = position === 'left' ? 'left-0 pl-2' : 'right-0 pr-2';
-  const sizeMap: Record<ComponentSize, string> = {
-    xs: 'w-4 h-4',
+  const positionClasses = {
+    left: 'left-3',
+    right: 'right-3',
+  };
+  
+  const iconSizes = {
+    xs: 'w-3 h-3',
     sm: 'w-4 h-4',
     md: 'w-5 h-5',
     lg: 'w-5 h-5',
     xl: 'w-6 h-6',
-    '2xl': 'w-6 h-6',
+    '2xl': 'w-7 h-7',
   };
-  return `${base} ${translate} ${sizeMap[size]}`;
+
+  return cn(
+    'absolute inset-y-0 flex items-center pointer-events-none',
+    positionClasses[position],
+    iconSizes[size]
+  );
 }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState, useId } from 'react';
 import type { AccordionProps } from './Accordion.types';
 import {
   getAccordionButtonStyles,
@@ -10,7 +10,7 @@ import { cn } from '../../utils';
 
 // fall back simple chevron svg
 
-export const Accordion: React.FC<AccordionProps> = ({
+export const Accordion = ({
   variant = 'single',
   items,
   defaultOpen = [],
@@ -18,7 +18,9 @@ export const Accordion: React.FC<AccordionProps> = ({
   expandIcon,
   className,
   onChange,
-}) => {
+  ...htmlProps
+}: AccordionProps) => {
+  const accordionId = useId();
   const multiple = allowMultiple ?? variant === 'multiple';
 
   const [openIds, setOpenIds] = useState<string[]>(defaultOpen);
@@ -35,18 +37,21 @@ export const Accordion: React.FC<AccordionProps> = ({
   };
 
   return (
-    <div className={cn(getAccordionContainerStyles(variant), className)}>
+    <div id={accordionId} className={cn(getAccordionContainerStyles(variant), className)} {...htmlProps}>
       {items.map(({ id, title, content, disabled }) => {
         const open = openIds.includes(id);
+        const buttonId = useId();
+        const panelId = useId();
         return (
           <div key={id} className={getAccordionItemStyles(variant)}>
             <button
+              id={buttonId}
               type="button"
               disabled={disabled}
               onClick={() => toggleItem(id)}
               className={getAccordionButtonStyles()}
               aria-expanded={open}
-              aria-controls={`${id}-panel`}
+              aria-controls={panelId}
             >
               <span>{title}</span>
               <span className={getAccordionIconStyles(open)}>
@@ -65,7 +70,7 @@ export const Accordion: React.FC<AccordionProps> = ({
               </span>
             </button>
             {open && (
-              <div id={`${id}-panel`} className="mt-2 text-sm text-gray-600">
+              <div id={panelId} className="mt-2 text-sm text-gray-600" role="region" aria-labelledby={buttonId}>
                 {content}
               </div>
             )}

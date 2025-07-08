@@ -1,5 +1,7 @@
 import '@testing-library/jest-dom';
+import { vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { vi } from 'vitest';
 import { Navigation } from './Navigation';
 import { axe } from 'jest-axe';
 
@@ -16,7 +18,7 @@ describe('Navigation', () => {
   });
 
   it('calls onItemClick', () => {
-    const onClick = jest.fn();
+    const onClick = vi.fn();
     render(<Navigation items={items} onItemClick={onClick} />);
     fireEvent.click(screen.getByText('About'));
     expect(onClick).toHaveBeenCalledWith(items[1]);
@@ -48,7 +50,7 @@ describe('Navigation', () => {
   });
 
   it('toggles mobile menu and triggers click', () => {
-    const onClick = jest.fn();
+    const onClick = vi.fn();
     render(<Navigation variant="mobile" items={items} onItemClick={onClick} logo={<span>Logo</span>} />);
     const toggleBtn = screen.getByRole('button', { name: /toggle navigation/i });
     // Menu initially hidden

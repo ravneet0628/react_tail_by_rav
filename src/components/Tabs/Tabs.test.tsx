@@ -1,5 +1,7 @@
 import '@testing-library/jest-dom';
+import { vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { vi } from 'vitest';
 import { Tabs } from './Tabs';
 import { axe } from 'jest-axe';
 
@@ -16,7 +18,7 @@ describe('Tabs', () => {
   });
 
   it('calls onTabChange', () => {
-    const fn = jest.fn();
+    const fn = vi.fn();
     render(<Tabs items={items} onTabChange={fn} />);
     fireEvent.click(screen.getByRole('tab', { name: 'Two' }));
     expect(fn).toHaveBeenCalledWith(items[1]);

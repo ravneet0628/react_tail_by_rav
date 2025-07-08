@@ -1,23 +1,26 @@
-import React from 'react';
+import { useId, forwardRef } from 'react';
 import { cn } from '../../utils';
 import { TabsProps } from './Tabs.types';
 import { getTabsWrapperStyles, getTabStyles } from './Tabs.styles';
 
-export const Tabs: React.FC<TabsProps> = React.forwardRef<HTMLDivElement, TabsProps>(
+export const Tabs = forwardRef<HTMLDivElement, TabsProps>(
   (
     { items, activeItem, variant = 'basic', onTabChange, className, ...props },
     ref
   ) => {
+    const tabsId = useId();
     const wrapperCls = cn(getTabsWrapperStyles({ variant }), className);
 
     return (
-      <div ref={ref} className={wrapperCls} role="tablist" {...props}>
+      <div id={tabsId} ref={ref} className={wrapperCls} role="tablist" {...props}>
         {items.map((item) => {
           const isActive = item.id === activeItem;
           const tabCls = getTabStyles(variant, isActive);
+          const tabId = useId();
           return (
             <button
               key={item.id}
+              id={tabId}
               type="button"
               role="tab"
               aria-selected={isActive}

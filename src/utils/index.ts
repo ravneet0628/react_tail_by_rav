@@ -346,3 +346,12 @@ export function onClickOutside(
     document.removeEventListener('mousedown', handleClick);
   };
 }
+
+export { 
+  containerQuery, 
+  containerResponsive, 
+  CONTAINER_BREAKPOINTS, 
+  CONTAINER_LAYOUTS,
+  CONTAINER_ASPECTS 
+} from './containerQueries';
+export type { ContainerBreakpoint } from './containerQueries';

@@ -1,20 +1,23 @@
-import type { ReactNode } from 'react';
+import type { ReactNode, HTMLAttributes } from 'react';
+import type { BaseComponentProps, StandardVariant } from '../../types';
 
-export type BadgeVariant = 'default' | 'outline' | 'dot' | 'number' | 'status' | 'pill' | 'icon';
+/**
+ * Badge variants using standardized types
+ */
+export type BadgeVariant = StandardVariant;
 
-export interface BadgeProps {
-  /** Visual variant of the badge */
+/**
+ * Badge component props following standardized architecture
+ */
+export interface BadgeProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'className'>, BaseComponentProps {
+  /**
+   * Visual style variant
+   * @default 'solid'
+   */
   variant?: BadgeVariant;
-  /** Color variant */
-  color?: 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'neutral';
-  /** Size of the badge */
-  size?: 'sm' | 'md' | 'lg';
-  /** Content of the badge (ignored for dot variant) */
-  children?: ReactNode;
-  /** Numerical value for number variant */
-  count?: number;
-  /** Whether badge should be rendered as hidden */
-  hidden?: boolean;
-  /** Additional CSS classes */
-  className?: string;
+  
+  /**
+   * Badge content
+   */
+  children: ReactNode;
 }

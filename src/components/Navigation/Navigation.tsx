@@ -1,12 +1,26 @@
-import React, { forwardRef, useState } from 'react';
+import { forwardRef, useState, useId } from 'react';
+import { Menu, X } from 'lucide-react';
 import { cn } from '../../utils';
-import type { NavigationProps } from './Navigation.types';
-import type { NavigationItem } from '../../types';
-import { getNavigationStyles } from './Navigation.styles';
-import { X } from 'lucide-react';
+import type { NavigationProps, NavigationItem } from './Navigation.types';
+import { 
+  getNavigationStyles, 
+  getNavigationItemStyles, 
+  getMobileMenuButtonStyles,
+  getBreadcrumbSeparatorStyles
+} from './Navigation.styles';
 
 /**
- * Navigation component – currently implements the horizontal variant.
+ * Simplified Navigation component focusing on essential patterns
+ * 
+ * @example
+ * ```tsx
+ * <Navigation 
+ *   variant="horizontal"
+ *   items={navItems}
+ *   activeItem="home"
+ *   onItemClick={handleNavigation}
+ * />
+ * ```
  */
 export const Navigation = forwardRef<HTMLElement, NavigationProps>(
   (
@@ -22,283 +36,211 @@ export const Navigation = forwardRef<HTMLElement, NavigationProps>(
     },
     ref
   ) => {
-    // State for mobile variant menu
+    const navId = useId();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    // State for mega menu id
-    const [openMega, setOpenMega] = useState<string | null>(null);
-
-    const navStyles = getNavigationStyles({ variant });
-
-    // Mobile variant specific rendering
-    if (variant === 'mobile') {
-      return (
-        <nav
-          ref={ref}
-          className={cn(navStyles, className, 'relative')}
-          aria-label="Mobile Navigation"
-          {...props}
-        >
-          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
-            {logo && <div className="flex-shrink-0">{logo}</div>}
-            <button
-              type="button"
-              className="p-2 rounded-md text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500"
-              aria-controls="mobile-menu"
-              aria-expanded={mobileMenuOpen}
-              onClick={() => setMobileMenuOpen((prev) => !prev)}
-            >
-              {mobileMenuOpen ? (
-                <X className="w-6 h-6" aria-hidden="true" />
-              ) : (
-                <svg
-                  className="w-6 h-6"
-                  aria-hidden="true"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 6h18M3 12h18M3 18h18" />
-                </svg>
-              )}
-              <span className="sr-only">Toggle navigation</span>
-            </button>
-          </div>
-
-          {mobileMenuOpen && (
-            <div
-              id="mobile-menu"
-              className="absolute top-full left-0 w-full bg-white dark:bg-gray-800 shadow-md"
-            >
-              <ul className="flex flex-col py-2 list-none m-0 p-0" role="menu">
-                {items.map((item) => (
-                  <li key={item.id}>
-                    <button
-                      type="button"
-                      role="menuitem"
-                      className={cn(
-                        'w-full text-left px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700',
-                        item.id === activeItem && 'bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-300'
-                      )}
-                      onClick={() => {
-                        setMobileMenuOpen(false);
-                        onItemClick?.(item);
-                      }}
-                      disabled={item.disabled}
-                    >
-                      {item.icon && <span className="mr-2 inline-flex">{item.icon}</span>}
-                      {item.label}
-                    </button>
-                  </li>
-                ))}
-
-                {/* Actions placed at bottom */}
-                {actions && <li className="border-t border-gray-200 dark:border-gray-700 mt-2 px-4 py-2">{actions}</li>}
-              </ul>
-            </div>
-          )}
-        </nav>
-      );
-    }
-
-    if (variant === 'mega') {
-      return (
-        <nav
-          ref={ref}
-          className={cn(navStyles, className, 'relative')}
-          aria-label="Mega Navigation"
-          onMouseLeave={() => setOpenMega(null)}
-          {...props}
-        >
-          {/* Top bar */}
-          <ul role="menubar" className="flex items-center space-x-4 px-4 py-3 list-none m-0 p-0">
-            {items.map((item) => {
-              const hasChildren = Array.isArray(item.children) && item.children.length > 0;
-              return (
-                <li key={item.id} className="relative">
-                  <button
-                    type="button"
-                    role="menuitem"
-                    className={cn(
-                      'px-2 py-1 text-sm font-medium text-gray-700 hover:text-primary-600 dark:text-gray-300 dark:hover:text-primary-400 transition-colors',
-                      item.id === activeItem && 'text-primary-600 dark:text-primary-400'
-                    )}
-                    onMouseEnter={() => hasChildren && setOpenMega(item.id)}
-                    onFocus={() => hasChildren && setOpenMega(item.id)}
-                    onClick={() => {
-                      if (!hasChildren) onItemClick?.(item);
-                    }}
-                  >
-                    {item.label}
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-
-          {/* Mega panel */}
-          {openMega && (
-            <div className="absolute left-0 top-full w-full bg-white dark:bg-gray-800 shadow-lg border-t border-gray-200 dark:border-gray-700 py-6 z-10" data-testid="mega-panel">
-              <div className="max-w-6xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-6">
-                {items
-                  .find((it) => it.id === openMega)
-                  ?.children?.map((child) => (
-                    <a
-                      key={child.id}
-                      href={child.href}
-                      className="block text-sm text-gray-700 hover:text-primary-600 dark:text-gray-300 dark:hover:text-primary-400"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        onItemClick?.(child);
-                        setOpenMega(null);
-                      }}
-                    >
-                      {child.label}
-                    </a>
-                  ))}
-              </div>
-            </div>
-          )}
-        </nav>
-      );
-    }
-
-    const renderItem = (item: NavigationItem) => {
-      const isActive = item.id === activeItem;
-      const itemClasses = cn(
-        'px-3 py-2 rounded-md text-sm font-medium cursor-pointer transition-colors',
-        isActive
-          ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/20 dark:text-primary-300'
-          : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700/50'
-      );
-
-      return (
-        <li key={item.id}>
+    
+    // Handle item selection
+    const handleItemClick = (item: NavigationItem) => {
+      if (item.disabled) return;
+      
+      // Handle external links
+      if (item.href) {
+        if (item.target === '_blank') {
+          window.open(item.href, '_blank', 'noopener,noreferrer');
+        } else {
+          window.location.href = item.href;
+        }
+      }
+      
+      onItemClick?.(item);
+      
+      // Close mobile menu after selection
+      if (variant === 'horizontal') {
+        setMobileMenuOpen(false);
+      }
+    };
+    
+    // Handle keyboard navigation
+    const handleKeyDown = (event: React.KeyboardEvent, item: NavigationItem) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        handleItemClick(item);
+      }
+    };
+    
+    // Render navigation items
+    const renderNavItems = (isMobile = false) => {
+      return items.map((item) => {
+        const isActive = item.id === activeItem;
+        const itemClasses = getNavigationItemStyles(variant, isActive, item.disabled);
+        
+        return (
           <button
+            key={item.id}
             type="button"
-            className={itemClasses}
-            onClick={() => onItemClick?.(item)}
+            className={cn(itemClasses, isMobile && 'w-full justify-start')}
+            onClick={() => handleItemClick(item)}
+            onKeyDown={(e) => handleKeyDown(e, item)}
             disabled={item.disabled}
+            aria-current={isActive ? 'page' : undefined}
+            aria-label={item['aria-label'] || item.label}
           >
-            {item.icon && <span className="mr-2 inline-flex">{item.icon}</span>}
+            {item.icon && (
+              <span className="mr-2 w-4 h-4" aria-hidden="true">
+                {item.icon}
+              </span>
+            )}
             {item.label}
           </button>
-        </li>
-      );
+        );
+      });
     };
-
+    
+    // Render breadcrumb items
+    const renderBreadcrumbItems = () => {
+      return items.map((item, index) => {
+        const isLast = index === items.length - 1;
+        
+        return (
+          <div key={item.id} className="flex items-center">
+            {index > 0 && (
+              <span className={getBreadcrumbSeparatorStyles()}>/</span>
+            )}
+            <button
+              type="button"
+              className={getNavigationItemStyles(variant, false, isLast || item.disabled)}
+              disabled={isLast || item.disabled}
+              onClick={() => !isLast && handleItemClick(item)}
+              aria-current={isLast ? 'page' : undefined}
+            >
+              {item.label}
+            </button>
+          </div>
+        );
+      });
+    };
+    
+    const containerStyles = cn(getNavigationStyles(variant), className);
+    
+    // Breadcrumb variant
     if (variant === 'breadcrumb') {
       return (
-        <nav ref={ref} aria-label="Breadcrumb" className={cn(navStyles, className)} {...props}>
-          <ol className="flex space-x-2 text-sm list-none m-0 p-0">
-            {items.map((item, idx) => {
-              const isLast = idx === items.length - 1;
-              const linkClasses = cn(
-                'inline-flex items-center',
-                !isLast && 'text-primary-600 hover:underline dark:text-primary-400',
-                isLast && 'text-gray-500 dark:text-gray-300 cursor-default'
-              );
-
-              return (
-                <li key={item.id} className="inline-flex items-center">
-                  {idx > 0 && <span className="mx-1 text-gray-400">/</span>}
-                  <button
-                    type="button"
-                    className={linkClasses}
-                    disabled={isLast || item.disabled}
-                    onClick={() => !isLast && onItemClick?.(item)}
-                  >
-                    {item.label}
-                  </button>
-                </li>
-              );
-            })}
-          </ol>
+        <nav 
+          ref={ref} 
+          id={navId}
+          className={containerStyles}
+          aria-label="Breadcrumb"
+          {...props}
+        >
+          <div className="flex items-center space-x-0">
+            {renderBreadcrumbItems()}
+          </div>
         </nav>
       );
     }
-
+    
+    // Vertical variant
+    if (variant === 'vertical') {
+      return (
+        <nav 
+          ref={ref} 
+          id={navId}
+          className={containerStyles}
+          aria-label="Sidebar navigation"
+          {...props}
+        >
+          <div className="p-4 space-y-2">
+            {renderNavItems()}
+          </div>
+        </nav>
+      );
+    }
+    
+    // Tabs variant
     if (variant === 'tabs') {
       return (
-        <nav ref={ref} className={cn(navStyles, className)} aria-label="Tabs" {...props}>
-          <ul role="tablist" className="flex space-x-4 list-none m-0 p-0">
+        <nav 
+          ref={ref} 
+          id={navId}
+          className={containerStyles}
+          role="tablist"
+          {...props}
+        >
+          <div className="flex space-x-8">
             {items.map((item) => {
               const isActive = item.id === activeItem;
-              const tabClasses = cn(
-                'px-4 py-2 text-sm font-medium focus:outline-none transition-colors',
-                isActive
-                  ? 'text-primary-600 border-b-2 border-primary-600 dark:text-primary-400'
-                  : 'text-gray-600 hover:text-primary-600 border-b-2 border-transparent dark:text-gray-300 dark:hover:text-primary-400'
-              );
-
               return (
-                <li key={item.id}>
-                  <button
-                    role="tab"
-                    type="button"
-                    className={tabClasses}
-                    aria-selected={isActive}
-                    onClick={() => onItemClick?.(item)}
-                    disabled={item.disabled}
-                    id={`tab-${item.id}`}
-                  >
-                    {item.label}
-                  </button>
-                </li>
+                <button
+                  key={item.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={isActive}
+                  className={getNavigationItemStyles(variant, isActive, item.disabled)}
+                  onClick={() => handleItemClick(item)}
+                  disabled={item.disabled}
+                >
+                  {item.icon && (
+                    <span className="mr-2 w-4 h-4">{item.icon}</span>
+                  )}
+                  {item.label}
+                </button>
               );
             })}
-          </ul>
-        </nav>
-      );
-    }
-
-    if (variant === 'pagination') {
-      return (
-        <nav ref={ref} className={cn(navStyles, className)} aria-label="Pagination" {...props}>
-          <ul className="inline-flex items-center space-x-1 list-none m-0 p-0">
-            {items.map((item) => {
-              const isActive = item.id === activeItem;
-              const btnClasses = cn(
-                'px-3 py-1.5 text-sm rounded-md',
-                isActive
-                  ? 'bg-primary-600 text-white'
-                  : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700'
-              );
-
-              return (
-                <li key={item.id}>
-                  <button
-                    type="button"
-                    className={btnClasses}
-                    onClick={() => onItemClick?.(item)}
-                    disabled={item.disabled}
-                    aria-current={isActive ? 'page' : undefined}
-                  >
-                    {item.label}
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
-      );
-    }
-
-    const listClasses = variant === 'vertical'
-      ? 'flex flex-col items-start space-y-1 list-none m-0 p-0'
-      : 'flex-1 flex items-center space-x-2 list-none m-0 p-0';
-
-    return (
-      <nav ref={ref} className={cn(navStyles, className)} {...props}>
-        {logo && (
-          <div className={variant === 'vertical' ? 'mb-4' : 'flex-shrink-0 mr-6'}>
-            {logo}
           </div>
-        )}
-        <ul className={listClasses}>{items.map(renderItem)}</ul>
-        {actions && (
-          <div className={variant === 'vertical' ? 'mt-4 flex items-center space-x-2' : 'ml-6 flex items-center space-x-2'}>
-            {actions}
+        </nav>
+      );
+    }
+    
+    // Horizontal variant (default)
+    return (
+      <nav 
+        ref={ref} 
+        id={navId}
+        className={containerStyles}
+        aria-label="Main navigation"
+        {...props}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-16">
+            {/* Logo */}
+            {logo && (
+              <div className="flex items-center">
+                {logo}
+              </div>
+            )}
+            
+            {/* Desktop navigation */}
+            <div className="hidden md:flex md:items-center md:space-x-8">
+              {renderNavItems()}
+            </div>
+            
+            {/* Actions */}
+            {actions && (
+              <div className="flex items-center space-x-4">
+                {actions}
+              </div>
+            )}
+            
+            {/* Mobile menu button */}
+            <div className="md:hidden flex items-center">
+              <button
+                type="button"
+                className={getMobileMenuButtonStyles()}
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                aria-label="Toggle mobile menu"
+              >
+                {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        {/* Mobile menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden">
+            <div className="px-2 pt-2 pb-3 space-y-1 bg-white border-t border-gray-200">
+              {renderNavItems(true)}
+            </div>
           </div>
         )}
       </nav>

@@ -1,8 +1,8 @@
-import React, { forwardRef } from 'react';
+import { forwardRef, useId } from 'react';
 import { cn } from '../../utils';
 import type { InputProps } from './Input.types';
 import {
-  getInputFieldStyles,
+  getInputStyles,
   getLabelStyles,
   getHelperTextStyles,
   getIconWrapperStyles,
@@ -38,16 +38,25 @@ export const Input = forwardRef<
     ...rest
   } = props as any; // rest typed later per variant
 
+  // Generate unique IDs for accessibility
+  const inputId = useId();
+  const helpId = useId();
+
   const hasIcon = Boolean(icon);
   const hasIconLeft = hasIcon && iconPosition === 'left';
   const hasIconRight = hasIcon && iconPosition === 'right';
-  const fieldStyles = getInputFieldStyles({
+  
+  // Build field styles using the correct function signature
+  const fieldStyles = getInputStyles(
     size,
-    error: Boolean(error),
-    disabled,
-    hasIconLeft,
-    hasIconRight,
-  });
+    'default', // Use default variant styling
+    error ? 'error' : undefined,
+    disabled
+  );
+
+  // Add icon padding to field styles
+  const iconPadding = hasIconLeft ? 'pl-8' : hasIconRight ? 'pr-8' : '';
+  const finalFieldStyles = cn(fieldStyles, iconPadding);
 
   // Render icon if provided
   const renderIcon = () => {
@@ -59,66 +68,44 @@ export const Input = forwardRef<
     );
   };
 
-  // Determine field element based on variant
+  // Render the appropriate input field based on variant
   const renderField = () => {
+    const commonProps = {
+      ref: ref as any,
+      id: inputId,
+      className: cn(finalFieldStyles, className),
+      placeholder,
+      disabled,
+      required,
+      'aria-invalid': Boolean(error),
+      'aria-describedby': (helperText || error) ? helpId : undefined,
+      ...rest,
+    };
+
     switch (variant) {
       case 'textarea':
-        // eslint-disable-next-line react/jsx-props-no-spreading
-        return (
-          <textarea
-            ref={ref as React.Ref<HTMLTextAreaElement>}
-            rows={rows}
-            placeholder={placeholder}
-            disabled={disabled}
-            aria-invalid={Boolean(error)}
-            aria-describedby={helperText || error ? `${rest.id}-help` : undefined}
-            className={cn(fieldStyles, className, 'resize-none', hasIcon && 'relative')}
-            {...(rest as any)}
-          />
-        );
+        return <textarea rows={rows} {...commonProps} />;
+      
       case 'select':
         return (
-          <select
-            ref={ref as React.Ref<HTMLSelectElement>}
-            disabled={disabled}
-            aria-invalid={Boolean(error)}
-            aria-describedby={helperText || error ? `${rest.id}-help` : undefined}
-            className={cn(fieldStyles, className, hasIcon && 'appearance-none')}
-            {...(rest as any)}
-          >
-            {placeholder && (
-              <option value="" disabled hidden>
-                {placeholder}
-              </option>
-            )}
-            {options.map((opt: { label: string; value: string | number }) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
+          <select {...commonProps}>
+            {options.map((option: { value: string; label: string; disabled?: boolean }) => (
+              <option key={option.value} value={option.value} disabled={option.disabled}>
+                {option.label}
               </option>
             ))}
           </select>
         );
+      
       default:
-        return (
-          <input
-            ref={ref as React.Ref<HTMLInputElement>}
-            type={variant === 'password' ? 'password' : variant === 'email' ? 'email' : variant === 'number' ? 'number' : variant === 'search' ? 'search' : 'text'}
-            placeholder={placeholder}
-            disabled={disabled}
-            required={required}
-            aria-invalid={Boolean(error)}
-            aria-describedby={helperText || error ? `${rest.id}-help` : undefined}
-            className={cn(fieldStyles, className)}
-            {...(rest as any)}
-          />
-        );
+        return <input type={variant} {...commonProps} />;
     }
   };
 
   return (
     <div className="flex flex-col w-full">
       {label && (
-        <label htmlFor={(rest as any).id} className={getLabelStyles(Boolean(error))}>
+        <label htmlFor={inputId} className={getLabelStyles(size, required)}>
           {label}
           {required && <span className="ml-0.5 text-error-600">*</span>}
         </label>
@@ -128,7 +115,7 @@ export const Input = forwardRef<
         {renderField()}
       </div>
       {(helperText || error) && (
-        <p id={`${(rest as any).id}-help`} className={getHelperTextStyles(Boolean(error))}>
+        <p id={helpId} className={getHelperTextStyles(error ? 'error' : undefined)}>
           {error || helperText}
         </p>
       )}

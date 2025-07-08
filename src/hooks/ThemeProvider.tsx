@@ -1,4 +1,4 @@
-import React, { createContext, useContext, ReactNode } from 'react';
+import { createContext, useContext, ReactNode, useId } from 'react';
 import { useTheme } from './useTheme';
 import type { ThemeMode } from '../types';
 
@@ -15,11 +15,14 @@ interface ThemeProviderProps {
 }
 
 export function ThemeProvider({ children, initialMode = 'system' }: ThemeProviderProps) {
+  const providerId = useId();
   const [mode, setMode] = useTheme(initialMode);
 
   return (
     <ThemeContext.Provider value={{ mode, setMode }}>
-      {children}
+      <div id={providerId} data-theme-provider="true">
+        {children}
+      </div>
     </ThemeContext.Provider>
   );
 }

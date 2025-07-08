@@ -1,5 +1,6 @@
 import '@testing-library/jest-dom';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { vi } from 'vitest';
 import { Dropdown } from './Dropdown';
 import { axe } from 'jest-axe';
 
@@ -15,7 +16,7 @@ describe('Dropdown', () => {
   });
 
   it('opens list and selects value', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     render(<Dropdown options={options} onChange={onChange} />);
     fireEvent.click(screen.getByRole('button'));
     fireEvent.click(screen.getByText('Two'));
@@ -23,7 +24,7 @@ describe('Dropdown', () => {
   });
 
   it('handles multi select', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     render(<Dropdown variant="multi" options={options} onChange={onChange} />);
     fireEvent.click(screen.getByRole('button'));
     fireEvent.click(screen.getByText('One'));
@@ -62,7 +63,7 @@ describe('Dropdown', () => {
   });
 
   it('loads options asynchronously', async () => {
-    const load = jest.fn(async () => [{ label: 'Async 1', value: 'a1' }]);
+    const load = vi.fn(async () => [{ label: 'Async 1', value: 'a1' }]);
     render(<Dropdown variant="async" placeholder="Async" loadOptions={load} />);
     fireEvent.click(screen.getByRole('button'));
     expect(load).toHaveBeenCalled();

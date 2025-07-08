@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react';
+import { forwardRef, useId } from 'react';
 import { cn } from '../../utils';
 import type { FooterProps, FooterColumn } from './Footer.types';
 import { getFooterStyles } from './Footer.styles';
@@ -25,6 +25,7 @@ export const Footer = forwardRef<HTMLElement, FooterProps>(
     },
     ref
   ) => {
+    const footerId = useId();
     const footerClasses = cn(getFooterStyles({ variant }), className);
 
     const renderSimple = () => (
@@ -37,23 +38,30 @@ export const Footer = forwardRef<HTMLElement, FooterProps>(
       </div>
     );
 
-    const renderColumn = (column: FooterColumn) => (
-      <div key={column.title} className="space-y-2">
-        <h4 className="font-semibold text-gray-700 dark:text-gray-100 mb-2">{column.title}</h4>
-        <ul className="space-y-1 list-none m-0 p-0">
-          {column.links.map((link) => (
-            <li key={link.href}>
-              <a
-                href={link.href}
-                className="text-sm text-gray-600 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 transition-colors"
-              >
-                {link.label}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </div>
-    );
+    const renderColumn = (column: FooterColumn) => {
+      const columnId = useId();
+      return (
+        <div key={column.title} className="space-y-2">
+          <h4 id={columnId} className="font-semibold text-gray-700 dark:text-gray-100 mb-2">{column.title}</h4>
+          <ul className="space-y-1 list-none m-0 p-0" aria-labelledby={columnId}>
+            {column.links.map((link) => {
+              const linkId = useId();
+              return (
+                <li key={link.href}>
+                  <a
+                    id={linkId}
+                    href={link.href}
+                    className="text-sm text-gray-600 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 transition-colors"
+                  >
+                    {link.label}
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      );
+    };
 
     const renderMultiColumn = () => (
       <div className="container mx-auto px-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
@@ -90,7 +98,7 @@ export const Footer = forwardRef<HTMLElement, FooterProps>(
     };
 
     return (
-      <footer ref={ref} className={footerClasses} {...props}>
+      <footer id={footerId} ref={ref} className={footerClasses} {...props}>
         {renderContent()}
       </footer>
     );

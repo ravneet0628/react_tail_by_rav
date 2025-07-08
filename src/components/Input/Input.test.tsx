@@ -1,5 +1,6 @@
 import '@testing-library/jest-dom';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { vi } from 'vitest';
 import { Input } from './Input';
 import { axe } from 'jest-axe';
 
@@ -10,7 +11,7 @@ describe('Input', () => {
   });
 
   it('calls onChange when value changes', () => {
-    const handleChange = jest.fn();
+    const handleChange = vi.fn();
     render(<Input placeholder="Name" onChange={handleChange} />);
     fireEvent.change(screen.getByPlaceholderText('Name'), { target: { value: 'John' } });
     expect(handleChange).toHaveBeenCalled();

@@ -14,7 +14,7 @@ const variantStyles: Record<AccordionVariant, string> = {
 };
 
 export function getAccordionContainerStyles(variant: AccordionVariant = 'single'): string {
-  return cva(base, { variant: variantStyles }, { variant });
+  return `${base} ${variantStyles[variant]}`.trim();
 }
 
 export function getAccordionItemStyles(variant: AccordionVariant = 'single'): string {

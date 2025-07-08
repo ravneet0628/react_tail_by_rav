@@ -1,15 +1,16 @@
-import type { ReactNode } from 'react';
+import type { ReactNode, HTMLAttributes } from 'react';
+import type { BaseComponentProps, ComponentSize } from '../../types';
 
 export type AvatarVariant = 'image' | 'initials' | 'icon' | 'placeholder' | 'group' | 'status' | 'upload';
 
-export interface AvatarProps {
+// Modern interface with proper optional property handling
+export interface AvatarProps extends Omit<HTMLAttributes<HTMLDivElement>, 'style' | 'className'>, BaseComponentProps {
   variant?: AvatarVariant;
-  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+  size?: ComponentSize | '2xl';
   src?: string;
   alt?: string;
   name?: string;
   status?: 'online' | 'offline' | 'away' | 'busy';
   icon?: ReactNode;
   onUpload?: (file: File) => void;
-  className?: string;
 }

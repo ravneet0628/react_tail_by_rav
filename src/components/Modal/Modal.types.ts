@@ -1,7 +1,7 @@
 import type { ReactNode, HTMLAttributes } from 'react';
 import type { BaseComponentProps, ComponentSize, Position } from '../../types';
 
-export type ModalVariant = 'default' | 'fullscreen' | 'drawer' | 'dialog';
+export type ModalVariant = 'default' | 'dialog' | 'fullscreen' | 'drawer' | 'popup' | 'confirmation' | 'form' | 'image';
 
 // Modern interface with proper optional property handling
 export interface ModalProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title' | 'style' | 'className'>, BaseComponentProps {

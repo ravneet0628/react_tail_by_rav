@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef, useId } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { cn } from '../../utils';
@@ -6,7 +6,7 @@ import { useFocusTrap, useKeyPress } from '../../hooks';
 import type { ModalProps } from './Modal.types';
 import { getBackdropStyles, getModalContainerStyles, getDrawerStyles } from './Modal.styles';
 
-export const Modal: React.FC<ModalProps> = ({
+export const Modal = ({
   open,
   onClose,
   title,
@@ -21,8 +21,11 @@ export const Modal: React.FC<ModalProps> = ({
   children,
   className,
   ...props
-}) => {
+}: ModalProps) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const modalId = useId();
+  const headerId = useId();
+  const bodyId = useId();
 
   // Close on Escape key
   const escPressed = useKeyPress('Escape');
@@ -69,21 +72,38 @@ export const Modal: React.FC<ModalProps> = ({
   containerCls = cn(containerCls, className);
 
   const modalContent = (
-    <div className={backdropCls} onMouseDown={backdropClick} aria-modal="true" role="dialog">
-      <div ref={containerRef} className={containerCls} {...props}>
+    <div 
+      className={backdropCls} 
+      onMouseDown={backdropClick} 
+      aria-modal="true" 
+      role="dialog"
+      aria-labelledby={title || header ? headerId : undefined}
+      aria-describedby={bodyId}
+    >
+      <div 
+        ref={containerRef} 
+        id={modalId}
+        className={containerCls} 
+        {...props}
+      >
         {/* Header */}
         {(title || header || showCloseButton) && (
-          <div className="flex items-start justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+          <div id={headerId} className="flex items-start justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
             <div className="text-lg font-medium text-gray-900 dark:text-gray-100">{header || title}</div>
             {showCloseButton && (
-              <button type="button" onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+              <button 
+                type="button" 
+                onClick={onClose} 
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                aria-label="Close modal"
+              >
                 <X className="w-5 h-5" />
               </button>
             )}
           </div>
         )}
         {/* Body */}
-        <div className="px-4 py-6 overflow-y-auto max-h-[80vh]">{children}</div>
+        <div id={bodyId} className="px-4 py-6 overflow-y-auto max-h-[80vh]">{children}</div>
         {/* Footer */}
         {footer && <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-700">{footer}</div>}
       </div>

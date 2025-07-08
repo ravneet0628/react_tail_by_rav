@@ -1,96 +1,204 @@
-import { cva } from '../../utils';
-import type { AlertConfig } from './Alert.types';
+import type { AlertVariant } from './Alert.types';
+import type { ComponentColor } from '../../types';
 
-// Base alert styles
+// Extended alert variant type for internal styling
+type ExtendedAlertVariant = AlertVariant | 'banner' | 'toast' | 'inline';
+
+/**
+ * Configuration for alert styling
+ */
+export interface AlertConfig {
+  variant: ExtendedAlertVariant;
+  dismissible?: boolean;
+  icon?: boolean;
+}
+
+// Base alert styles following design token system
 const baseStyles = [
-  'relative',
   'rounded-lg',
-  'p-4',
   'border',
+  'p-4',
+  'text-sm',
+  'flex',
+  'items-start',
+  'gap-3',
+  'leading-normal',
+  
+  // Smooth transitions for dynamic alerts
   'transition-all',
   'duration-200',
+  'ease-in-out',
 ].join(' ');
 
-// Variant styles
-const variantStyles = {
-  info: 'bg-blue-50 border-blue-200 text-blue-800 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-200',
-  success: 'bg-green-50 border-green-200 text-green-800 dark:bg-green-900/20 dark:border-green-800 dark:text-green-200',
-  warning: 'bg-yellow-50 border-yellow-200 text-yellow-800 dark:bg-yellow-900/20 dark:border-yellow-800 dark:text-yellow-200',
-  error: 'bg-red-50 border-red-200 text-red-800 dark:bg-red-900/20 dark:border-red-800 dark:text-red-200',
-  banner: 'bg-gray-50 border-gray-200 text-gray-800 dark:bg-gray-900/20 dark:border-gray-700 dark:text-gray-200 rounded-none border-l-4 border-l-blue-500',
-  toast: 'bg-white border-gray-200 text-gray-900 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 shadow-lg',
-  inline: 'bg-transparent border-transparent text-gray-700 dark:text-gray-300 p-2 rounded',
+// Semantic color system for alert variants
+const variantStyles: Record<ExtendedAlertVariant, string> = {
+  // Informational alerts with blue theming
+  info: [
+    'bg-blue-50',
+    'border-blue-200',
+    'text-blue-800',
+  ].join(' '),
+  
+  // Success alerts with green theming
+  success: [
+    'bg-green-50',
+    'border-green-200',
+    'text-green-800',
+  ].join(' '),
+  
+  // Warning alerts with yellow theming
+  warning: [
+    'bg-yellow-50',
+    'border-yellow-200',
+    'text-yellow-800',
+  ].join(' '),
+  
+  // Error alerts with red theming
+  error: [
+    'bg-red-50',
+    'border-red-200',
+    'text-red-800',
+  ].join(' '),
+  
+  // Banner alerts with left border emphasis
+  banner: [
+    'bg-gray-50',
+    'border-gray-200',
+    'text-gray-800',
+    'rounded-none',
+    'border-l-4',
+    'border-l-blue-500',
+  ].join(' '),
+  
+  // Toast alerts with elevated appearance
+  toast: [
+    'bg-white',
+    'border-gray-200',
+    'text-gray-800',
+    'shadow-lg',
+    'shadow-gray-200/50',
+  ].join(' '),
+  
+  // Inline alerts for form fields
+  inline: [
+    'bg-transparent',
+    'border-transparent',
+    'text-gray-700',
+    'p-2',
+  ].join(' '),
 };
 
-// Dismissible styles
-const dismissibleStyles = 'pr-12';
-
-// With icon styles
-const withIconStyles = 'pl-12';
-
-// With action styles
-const withActionStyles = 'pb-12';
-
-export function getAlertStyles(config: AlertConfig): string {
-  const { variant, dismissible = false, icon = false } = config;
-
-  const variantStyle = variantStyles[variant];
-  const classes = [baseStyles, variantStyle];
-
-  if (dismissible) {
-    classes.push(dismissibleStyles);
-  }
-
-  if (icon) {
-    classes.push(withIconStyles);
-  }
-
-  return classes.join(' ');
+/**
+ * Generates alert class string based on configuration
+ */
+export function getAlertStyles(config: AlertConfig | ExtendedAlertVariant): string {
+  // Handle both old string parameter and new config object
+  const variant = typeof config === 'string' ? config : config.variant;
+  return `${baseStyles} ${variantStyles[variant]}`.trim();
 }
 
-// Icon styles
-export function getAlertIconStyles(variant: string): string {
-  const iconColors = {
-    info: 'text-blue-500 dark:text-blue-400',
-    success: 'text-green-500 dark:text-green-400',
-    warning: 'text-yellow-500 dark:text-yellow-400',
-    error: 'text-red-500 dark:text-red-400',
-    banner: 'text-blue-500 dark:text-blue-400',
-    toast: 'text-gray-500 dark:text-gray-400',
-    inline: 'text-gray-500 dark:text-gray-400',
-  } as Record<string, string>;
+/**
+ * Generates alert icon class string with semantic colors
+ */
+export function getAlertIconStyles(variant: ExtendedAlertVariant): string {
+  const iconColors: Record<ExtendedAlertVariant, string> = {
+    info: 'text-blue-500',
+    success: 'text-green-500',
+    warning: 'text-yellow-500',
+    error: 'text-red-500',
+    banner: 'text-blue-500',
+    toast: 'text-gray-500',
+    inline: 'text-gray-500',
+  };
 
-  return `absolute left-3 top-4 w-5 h-5 ${iconColors[variant] || iconColors.info}`;
+  const baseIconClasses = [
+    'w-5',
+    'h-5',
+    'flex-shrink-0',
+    'mt-0.5',
+  ].join(' ');
+
+  return `${baseIconClasses} ${iconColors[variant]}`;
 }
 
-// Dismiss button styles
-export function getDismissButtonStyles(): string {
-  return 'absolute right-3 top-3 w-6 h-6 rounded hover:bg-black/10 dark:hover:bg-white/10 flex items-center justify-center transition-colors';
+/**
+ * Generates alert title class string with proper typography
+ */
+export function getAlertTitleStyles(): string {
+  return [
+    'font-medium',
+    'text-base',
+    'leading-normal',
+    'mb-1',
+  ].join(' ');
 }
 
-// Title styles
-export function getAlertTitleStyles(variant: string): string {
-  const baseTitle = 'font-semibold mb-1';
-  
-  const titleColors = {
-    info: 'text-blue-900 dark:text-blue-100',
-    success: 'text-green-900 dark:text-green-100',
-    warning: 'text-yellow-900 dark:text-yellow-100',
-    error: 'text-red-900 dark:text-red-100',
-    banner: 'text-gray-900 dark:text-gray-100',
-    toast: 'text-gray-900 dark:text-gray-100',
-    inline: 'text-gray-900 dark:text-gray-100',
-  } as Record<string, string>;
-
-  return `${baseTitle} ${titleColors[variant] || titleColors.info}`;
+/**
+ * Generates alert description class string
+ */
+export function getAlertDescriptionStyles(): string {
+  return [
+    'text-sm',
+    'leading-normal',
+    'opacity-90',
+  ].join(' ');
 }
 
-// Content styles
-export function getAlertContentStyles(): string {
-  return 'text-sm leading-relaxed';
-}
-
-// Action styles
+/**
+ * Generates alert action container class string
+ */
 export function getAlertActionStyles(): string {
-  return 'mt-3 pt-3 border-t border-current/20 flex gap-2';
+  return [
+    'mt-3',
+    'flex',
+    'gap-2',
+    'flex-wrap',
+  ].join(' ');
 }
+
+/**
+ * Generates close button class string for dismissible alerts
+ */
+export function getAlertCloseStyles(): string {
+  return [
+    'ml-auto',
+    'pl-3',
+    'cursor-pointer',
+    'text-gray-400',
+    'hover:text-gray-600',
+    'focus:outline-none',
+    'focus:ring-2',
+    'focus:ring-gray-500',
+    'focus:ring-offset-2',
+    'rounded',
+    'transition-colors',
+    'duration-150',
+    'flex-shrink-0',
+    'w-5',
+    'h-5',
+  ].join(' ');
+}
+
+/**
+ * Generates custom alert styles with configurable colors
+ */
+export function getCustomAlertStyles(color: ComponentColor): string {
+  const colorStyles: Record<ComponentColor, string> = {
+    primary: 'bg-blue-50 border-blue-200 text-blue-800',
+    secondary: 'bg-gray-50 border-gray-200 text-gray-800',
+    accent: 'bg-purple-50 border-purple-200 text-purple-800',
+    success: 'bg-green-50 border-green-200 text-green-800',
+    warning: 'bg-yellow-50 border-yellow-200 text-yellow-800',
+    error: 'bg-red-50 border-red-200 text-red-800',
+    info: 'bg-cyan-50 border-cyan-200 text-cyan-800',
+    gray: 'bg-gray-50 border-gray-200 text-gray-800',
+    neutral: 'bg-gray-50 border-gray-200 text-gray-800',
+    transparent: 'bg-transparent border-gray-200 text-gray-800',
+  };
+
+  return `${baseStyles} ${colorStyles[color]}`.trim();
+}
+
+// Legacy function exports for backward compatibility
+export const getDismissButtonStyles = getAlertCloseStyles;
+export const getAlertContentStyles = getAlertDescriptionStyles;

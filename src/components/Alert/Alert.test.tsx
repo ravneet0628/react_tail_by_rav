@@ -1,5 +1,7 @@
 import '@testing-library/jest-dom';
+import { vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { vi } from 'vitest';
 import { Alert } from './Alert';
 import { axe } from 'jest-axe';
 
@@ -11,7 +13,7 @@ describe('Alert', () => {
   });
 
   it('handles dismiss', () => {
-    const onDismiss = jest.fn();
+    const onDismiss = vi.fn();
     render(
       <Alert title="Dismiss" dismissible onDismiss={onDismiss}>
         Content
